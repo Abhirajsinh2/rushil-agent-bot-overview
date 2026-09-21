@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en" data-theme="">
+<head>
+<meta charset="utf-8">
+<title>15m_short_intrabar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:  #fcfcfb;
+    --page:       #f9f9f7;
+    --text-1:     #0b0b0b;
+    --text-2:     #52514e;
+    --muted:      #898781;
+    --grid:       #e1e0d9;
+    --baseline:   #c3c2b7;
+    --border:     rgba(11,11,11,0.10);
+    --series-1:   #2a78d6;
+    --good:       #0ca30c;
+    --critical:   #d03b3b;
+    --good-text:  #006300;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1:  #1a1a19;
+      --page:       #0d0d0d;
+      --text-1:     #ffffff;
+      --text-2:     #c3c2b7;
+      --muted:      #898781;
+      --grid:       #2c2c2a;
+      --baseline:   #383835;
+      --border:     rgba(255,255,255,0.10);
+      --series-1:   #3987e5;
+      --good:       #0ca30c;
+      --critical:   #e66767;
+      --good-text:  #0ca30c;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:  #1a1a19;
+    --page:       #0d0d0d;
+    --text-1:     #ffffff;
+    --text-2:     #c3c2b7;
+    --muted:      #898781;
+    --grid:       #2c2c2a;
+    --baseline:   #383835;
+    --border:     rgba(255,255,255,0.10);
+    --series-1:   #3987e5;
+    --good:       #0ca30c;
+    --critical:   #e66767;
+    --good-text:  #0ca30c;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 20px 60px;
+    background: var(--page); color: var(--text-1);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+
+  .back-link { display: inline-block; margin-bottom: 16px; font-size: 13px; color: var(--text-2); text-decoration: none; }
+  .back-link:hover { color: var(--series-1); }
+
+  header { margin-bottom: 28px; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+  .subtitle { color: var(--text-2); font-size: 14px; }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+    gap: 12px; margin-bottom: 28px;
+  }
+  .tile {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px;
+  }
+  .tile .label { color: var(--text-2); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+  .tile .value { font-size: 26px; font-weight: 700; font-variant-numeric: proportional-nums; }
+  .tile .sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .value.pos { color: var(--good-text); }
+  .value.neg { color: var(--critical); }
+
+  section { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  section h2 { font-size: 14px; font-weight: 700; margin: 0 0 4px; color: var(--text-1); }
+  section .section-note { font-size: 12px; color: var(--text-2); margin: 0 0 14px; }
+
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--baseline); stroke-width: 1; }
+  .equity-line { fill: none; stroke: var(--series-1); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .equity-dot { fill: var(--surface-1); stroke: var(--series-1); stroke-width: 2; }
+  .equity-dot.neg { stroke: var(--critical); }
+  .equity-dot.pos { stroke: var(--good); }
+  .axis-label { fill: var(--muted); font-size: 11px; font-family: system-ui, sans-serif; }
+  .tooltip {
+    position: absolute; pointer-events: none; background: var(--text-1); color: var(--surface-1);
+    font-size: 12px; padding: 6px 10px; border-radius: 6px; transform: translate(-50%,-130%);
+    white-space: nowrap; opacity: 0; transition: opacity .1s; font-variant-numeric: tabular-nums;
+  }
+  .chart-wrap { position: relative; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+  th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+  td.num, th.num { text-align: right; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .badge.long { background: rgba(42,120,214,0.15); color: var(--series-1); }
+  .badge.short { background: rgba(74,58,167,0.15); color: #4a3aa7; }
+  .pnl.pos { color: var(--good-text); font-weight: 600; }
+  .pnl.neg { color: var(--critical); font-weight: 600; }
+  .sym { font-weight: 600; }
+  .empty-note { color: var(--muted); font-size: 13px; padding: 8px 0; }
+
+  .veto-bars { display: flex; flex-direction: column; gap: 10px; }
+  .veto-row { display: grid; grid-template-columns: 220px 1fr 40px; align-items: center; gap: 10px; font-size: 13px; }
+  .veto-bar-bg { background: var(--grid); border-radius: 4px; height: 10px; overflow: hidden; }
+  .veto-bar-fill { background: var(--series-1); height: 100%; border-radius: 4px; }
+  .veto-bar-fill.dominant { background: var(--critical); }
+
+  .callout {
+    background: rgba(208,59,59,0.08); border: 1px solid rgba(208,59,59,0.25);
+    border-radius: 10px; padding: 14px 16px; font-size: 13px; line-height: 1.5; margin-bottom: 20px;
+  }
+  .callout strong { color: var(--critical); }
+
+  .caveat {
+    font-size: 12px; color: var(--text-2); border-top: 1px solid var(--grid);
+    padding-top: 14px; margin-top: 4px; line-height: 1.5;
+  }
+
+  .stock-heading { font-size: 18px; font-weight: 700; margin: 8px 0 2px; }
+  .stock-heading-note { margin: 0 0 16px; }
+
+  .symbol-card { margin-bottom: 20px; }
+  .symbol-card-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px 20px; margin-bottom: 4px;
+  }
+  .symbol-card-head h3 { font-size: 16px; font-weight: 700; margin: 0; }
+  .symbol-card-stats { display: flex; gap: 16px; font-size: 12px; color: var(--text-2); }
+  .symbol-card-stats b { font-variant-numeric: tabular-nums; color: var(--text-1); }
+  .symbol-chart-wrap { position: relative; margin: 12px 0 16px; }
+  .symbol-chart-wrap svg { height: 90px; }
+  details.symbol-trades { margin-top: 4px; }
+  details.symbol-trades summary {
+    cursor: pointer; font-size: 12px; color: var(--series-1); font-weight: 600;
+    padding: 4px 0; user-select: none;
+  }
+  details.symbol-trades summary:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back-link" href="sweep.html">&larr; All runs</a>
+  <header>
+    <h1>15m_short_intrabar</h1>
+    <div class="subtitle">intrabar trigger sweep</div>
+  </header>
+
+  <div class="callout"><strong>15735 of 32599 signals</strong> (48% of all vetoes) were rejected for <code>max_total_concurrent_positions</code> - the single most common reason a detected setup never became a trade.</div>
+
+  <div class="stats">
+    <div class="tile">
+      <div class="label">Gross P&amp;L</div>
+      <div class="value pos">+₹164.05</div>
+      <div class="sub">before charges</div>
+    </div>
+    <div class="tile">
+      <div class="label">Charges</div>
+      <div class="value">₹210.22</div>
+      <div class="sub">128% of |gross P&amp;L|</div>
+    </div>
+    <div class="tile">
+      <div class="label">Net P&amp;L</div>
+      <div class="value neg">−₹46.17</div>
+      <div class="sub">gross minus charges</div>
+    </div>
+    <div class="tile">
+      <div class="label">Win rate</div>
+      <div class="value">39%</div>
+      <div class="sub">43 win(s) / 110 trades</div>
+    </div>
+    <div class="tile">
+      <div class="label">Trades filled</div>
+      <div class="value">110</div>
+      <div class="sub">of 32599 signals fired</div>
+    </div>
+    <div class="tile">
+      <div class="label">Vetoed</div>
+      <div class="value">32488</div>
+      <div class="sub">100% of signals</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>Cumulative P&amp;L across trades</h2>
+    <p class="section-note">All filled trades, in order across the whole universe</p>
+    <div class="chart-wrap">
+      <svg id="equity-chart" viewBox="0 0 800 220" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="tooltip" id="tooltip"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Per-symbol activity</h2>
+    <p class="section-note">Signals fired vs. trades actually filled, per stock - full trade detail is broken out below</p>
+    <table>
+      <thead><tr><th>Symbol</th><th class="num">Signals</th><th class="num">Trades filled</th><th class="num">Net P&amp;L</th></tr></thead>
+      <tbody id="symbol-body"></tbody>
+    </table>
+  </section>
+
+  <h2 class="stock-heading">Trades by stock</h2>
+  <p class="section-note stock-heading-note">Each stock's own trades, separate from the rest - only symbols with at least one filled trade are shown</p>
+  <div id="symbol-cards"></div>
+
+  <section>
+    <h2>Why most signals never became trades</h2>
+    <div class="veto-bars" id="veto-bars"></div>
+  </section>
+
+  <p class="caveat">
+    Paper mode only — no real orders were placed. Fixed 1-share sizing (never scaled or compounded),
+    so this net figure is not representative of capital-scaled returns. Entries and time-based exits
+    fill at the next candle's open (not the decision candle's close) to avoid look-ahead bias; stop-loss,
+    target, and forced square-off fill immediately. Time-based exit is rescaled to preserve Rushil's
+    original ~120-minute hold intent at this candle granularity. Generated from <code>journal_15m_short_intrabar/journal.csv</code>.
+  </p>
+</div>
+
+<script>
+const trades = [{"symbol": "TITAN", "dir": "SHORT", "entry_time": "2022-01-03 10:15", "entry": 2507.0, "exit_time": "2022-01-03 12:15", "exit": 2508.75, "reason": "TIME_EXIT", "gross": -1.75, "cost": 2.65, "pnl": -4.4}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2022-01-03 10:30", "entry": 843.0, "exit_time": "2022-01-03 11:15", "exit": 848.65, "reason": "STOP_LOSS", "gross": -5.65, "cost": 0.9, "pnl": -6.55}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2022-01-03 10:30", "entry": 473.9, "exit_time": "2022-01-03 12:30", "exit": 474.0, "reason": "TIME_EXIT", "gross": -0.1, "cost": 0.5, "pnl": -0.6}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2022-01-03 11:30", "entry": 688.0, "exit_time": "2022-01-03 12:15", "exit": 690.6, "reason": "STOP_LOSS", "gross": -2.6, "cost": 0.73, "pnl": -3.33}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2022-04-04 12:30", "entry": 765.8, "exit_time": "2022-04-04 13:00", "exit": 768.5, "reason": "STOP_LOSS", "gross": -2.7, "cost": 0.81, "pnl": -3.51}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2022-04-04 13:00", "entry": 1349.45, "exit_time": "2022-04-04 13:00", "exit": 1352.6, "reason": "STOP_LOSS", "gross": -3.15, "cost": 1.43, "pnl": -4.58}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2022-04-04 13:00", "entry": 2519.0, "exit_time": "2022-04-04 13:15", "exit": 2527.0, "reason": "STOP_LOSS", "gross": -8.0, "cost": 2.67, "pnl": -10.67}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2022-06-06 10:00", "entry": 865.6, "exit_time": "2022-06-06 10:15", "exit": 869.8, "reason": "STOP_LOSS", "gross": -4.2, "cost": 0.92, "pnl": -5.12}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2022-06-06 10:15", "entry": 531.3, "exit_time": "2022-06-06 10:15", "exit": 533.75, "reason": "STOP_LOSS", "gross": -2.45, "cost": 0.56, "pnl": -3.01}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2022-06-06 10:15", "entry": 1071.0, "exit_time": "2022-06-06 10:45", "exit": 1077.65, "reason": "STOP_LOSS", "gross": -6.65, "cost": 1.14, "pnl": -7.79}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2022-07-22 10:00", "entry": 676.2, "exit_time": "2022-07-22 12:00", "exit": 678.55, "reason": "TIME_EXIT", "gross": -2.35, "cost": 0.72, "pnl": -3.07}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2022-07-22 10:30", "entry": 1047.05, "exit_time": "2022-07-22 10:45", "exit": 1040.45, "reason": "TARGET", "gross": 6.6, "cost": 1.1, "pnl": 5.5}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2022-07-22 10:45", "entry": 2321.1, "exit_time": "2022-07-22 12:30", "exit": 2329.0, "reason": "STOP_LOSS", "gross": -7.9, "cost": 2.46, "pnl": -10.36}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2022-09-08 11:30", "entry": 551.5, "exit_time": "2022-09-08 11:45", "exit": 554.4, "reason": "STOP_LOSS", "gross": -2.9, "cost": 0.59, "pnl": -3.49}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2022-09-08 12:15", "entry": 2639.0, "exit_time": "2022-09-08 12:15", "exit": 2630.0, "reason": "TARGET", "gross": 9.0, "cost": 2.79, "pnl": 6.21}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2022-09-08 12:15", "entry": 891.0, "exit_time": "2022-09-08 14:00", "exit": 893.5, "reason": "STOP_LOSS", "gross": -2.5, "cost": 0.94, "pnl": -3.44}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2022-10-27 11:30", "entry": 728.8, "exit_time": "2022-10-27 13:30", "exit": 727.5, "reason": "TIME_EXIT", "gross": 1.3, "cost": 0.77, "pnl": 0.53}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2022-10-27 11:45", "entry": 509.45, "exit_time": "2022-10-27 13:45", "exit": 506.95, "reason": "TIME_EXIT", "gross": 2.5, "cost": 0.54, "pnl": 1.96}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2022-10-27 13:15", "entry": 411.2, "exit_time": "2022-10-27 15:15", "exit": 412.15, "reason": "TIME_EXIT", "gross": -0.95, "cost": 0.44, "pnl": -1.39}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2022-12-02 11:00", "entry": 843.95, "exit_time": "2022-12-02 13:00", "exit": 841.45, "reason": "TIME_EXIT", "gross": 2.5, "cost": 0.89, "pnl": 1.61}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2022-12-02 11:00", "entry": 3346.65, "exit_time": "2022-12-02 13:00", "exit": 3338.05, "reason": "TIME_EXIT", "gross": 8.6, "cost": 3.54, "pnl": 5.06}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2022-12-02 12:00", "entry": 561.8, "exit_time": "2022-12-02 12:15", "exit": 564.1, "reason": "STOP_LOSS", "gross": -2.3, "cost": 0.6, "pnl": -2.9}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2023-01-17 10:00", "entry": 763.05, "exit_time": "2023-01-17 11:30", "exit": 765.2, "reason": "STOP_LOSS", "gross": 78.75, "cost": 0.84, "pnl": 77.91}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2023-01-17 11:00", "entry": 584.15, "exit_time": "2023-01-17 13:00", "exit": 580.65, "reason": "TIME_EXIT", "gross": 3.5, "cost": 0.62, "pnl": 2.88}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2023-01-17 11:00", "entry": 1054.25, "exit_time": "2023-01-17 13:00", "exit": 1049.05, "reason": "TIME_EXIT", "gross": 5.2, "cost": 1.11, "pnl": 4.09}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2023-03-03 10:15", "entry": 2377.5, "exit_time": "2023-03-03 10:45", "exit": 2385.0, "reason": "STOP_LOSS", "gross": -7.5, "cost": 2.52, "pnl": -10.02}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2023-03-03 11:15", "entry": 3130.65, "exit_time": "2023-03-03 13:15", "exit": 3122.2, "reason": "TIME_EXIT", "gross": 8.45, "cost": 3.31, "pnl": 5.14}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2023-04-19 10:00", "entry": 998.4, "exit_time": "2023-04-19 11:15", "exit": 1002.2, "reason": "STOP_LOSS", "gross": -3.8, "cost": 1.06, "pnl": -4.86}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2023-04-19 10:00", "entry": 2579.0, "exit_time": "2023-04-19 12:00", "exit": 2573.55, "reason": "TIME_EXIT", "gross": 5.45, "cost": 2.73, "pnl": 2.72}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2023-05-22 10:15", "entry": 802.0, "exit_time": "2023-05-22 12:15", "exit": 803.2, "reason": "TIME_EXIT", "gross": -1.2, "cost": 0.85, "pnl": -2.05}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2023-05-22 10:15", "entry": 822.7, "exit_time": "2023-05-22 12:15", "exit": 820.5, "reason": "TIME_EXIT", "gross": 2.2, "cost": 0.87, "pnl": 1.33}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2023-05-22 10:15", "entry": 2717.9, "exit_time": "2023-05-22 12:15", "exit": 2725.4, "reason": "TIME_EXIT", "gross": -347.9, "cost": 2.74, "pnl": -350.64}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2023-06-21 10:15", "entry": 833.8, "exit_time": "2023-06-21 11:45", "exit": 837.0, "reason": "STOP_LOSS", "gross": -3.2, "cost": 0.88, "pnl": -4.08}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2023-06-21 10:15", "entry": 424.8, "exit_time": "2023-06-21 11:45", "exit": 418.65, "reason": "TARGET", "gross": 6.15, "cost": 0.45, "pnl": 5.7}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2023-07-27 10:00", "entry": 660.8, "exit_time": "2023-07-27 12:00", "exit": 660.4, "reason": "TIME_EXIT", "gross": 0.4, "cost": 0.7, "pnl": -0.3}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2023-07-27 10:30", "entry": 722.9, "exit_time": "2023-07-27 12:30", "exit": 723.2, "reason": "TIME_EXIT", "gross": -0.3, "cost": 0.77, "pnl": -1.07}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2023-08-31 14:00", "entry": 856.5, "exit_time": "2023-08-31 15:15", "exit": 857.05, "reason": "FORCED_SQUAREOFF", "gross": -0.55, "cost": 0.91, "pnl": -1.46}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2023-09-01 10:00", "entry": 3110.7, "exit_time": "2023-09-01 12:00", "exit": 3113.95, "reason": "TIME_EXIT", "gross": -3.25, "cost": 3.29, "pnl": -6.54}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2023-10-16 11:00", "entry": 763.4, "exit_time": "2023-10-16 11:30", "exit": 766.3, "reason": "STOP_LOSS", "gross": -2.9, "cost": 0.81, "pnl": -3.71}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2023-10-16 11:00", "entry": 3318.35, "exit_time": "2023-10-16 13:00", "exit": 3304.75, "reason": "TIME_EXIT", "gross": -194.05, "cost": 3.42, "pnl": -197.47}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2023-11-28 10:30", "entry": 516.5, "exit_time": "2023-11-28 12:30", "exit": 516.25, "reason": "TIME_EXIT", "gross": 0.25, "cost": 0.55, "pnl": -0.3}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2023-11-28 10:45", "entry": 1191.65, "exit_time": "2023-11-28 12:00", "exit": 1193.85, "reason": "STOP_LOSS", "gross": -2.2, "cost": 1.26, "pnl": -3.46}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2024-01-10 10:15", "entry": 3725.45, "exit_time": "2024-01-10 10:15", "exit": 3729.0, "reason": "STOP_LOSS", "gross": -3.55, "cost": 3.94, "pnl": -7.49}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2024-01-10 10:15", "entry": 3816.7, "exit_time": "2024-01-10 11:00", "exit": 3822.0, "reason": "STOP_LOSS", "gross": -5.3, "cost": 4.04, "pnl": -9.34}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2024-01-10 10:15", "entry": 573.45, "exit_time": "2024-01-10 11:00", "exit": 575.5, "reason": "STOP_LOSS", "gross": -2.05, "cost": 0.61, "pnl": -2.66}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2024-01-10 10:30", "entry": 1465.05, "exit_time": "2024-01-10 12:30", "exit": 1459.45, "reason": "TIME_EXIT", "gross": 5.6, "cost": 1.55, "pnl": 4.05}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2024-02-26 10:00", "entry": 3905.65, "exit_time": "2024-02-26 10:45", "exit": 3927.8, "reason": "STOP_LOSS", "gross": -22.15, "cost": 4.15, "pnl": -26.3}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2024-02-26 10:00", "entry": 1560.7, "exit_time": "2024-02-26 12:00", "exit": 1561.0, "reason": "TIME_EXIT", "gross": -0.3, "cost": 1.65, "pnl": -1.95}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2024-02-26 10:30", "entry": 1316.85, "exit_time": "2024-02-26 12:30", "exit": 1310.5, "reason": "TIME_EXIT", "gross": 154.55, "cost": 1.45, "pnl": 153.1}, {"symbol": "INDHOTEL", "dir": "SHORT", "entry_time": "2024-04-12 12:30", "entry": 605.85, "exit_time": "2024-04-12 12:45", "exit": 608.95, "reason": "STOP_LOSS", "gross": -3.1, "cost": 0.64, "pnl": -3.74}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2024-04-12 12:30", "entry": 1550.95, "exit_time": "2024-04-12 14:30", "exit": 1540.05, "reason": "TIME_EXIT", "gross": 10.9, "cost": 1.63, "pnl": 9.27}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2024-04-15 10:00", "entry": 752.0, "exit_time": "2024-04-15 10:30", "exit": 754.1, "reason": "STOP_LOSS", "gross": -2.1, "cost": 0.8, "pnl": -2.9}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2024-05-29 10:45", "entry": 1741.9, "exit_time": "2024-05-29 12:45", "exit": 1745.0, "reason": "TIME_EXIT", "gross": -3.1, "cost": 1.85, "pnl": -4.95}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2024-05-29 10:45", "entry": 1040.3, "exit_time": "2024-05-29 12:45", "exit": 1040.15, "reason": "TIME_EXIT", "gross": 0.15, "cost": 1.1, "pnl": -0.95}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2024-07-09 12:00", "entry": 699.8, "exit_time": "2024-07-09 12:30", "exit": 702.5, "reason": "STOP_LOSS", "gross": -2.7, "cost": 0.74, "pnl": -3.44}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2024-07-09 12:00", "entry": 4787.3, "exit_time": "2024-07-09 12:30", "exit": 4796.8, "reason": "STOP_LOSS", "gross": -9.5, "cost": 5.07, "pnl": -14.57}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2024-08-19 12:00", "entry": 1467.4, "exit_time": "2024-08-19 14:00", "exit": 1466.6, "reason": "TIME_EXIT", "gross": 0.8, "cost": 1.55, "pnl": -0.75}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2024-08-19 12:15", "entry": 1853.0, "exit_time": "2024-08-19 14:15", "exit": 1850.6, "reason": "TIME_EXIT", "gross": 2.4, "cost": 1.96, "pnl": 0.44}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2024-08-19 12:30", "entry": 1279.95, "exit_time": "2024-08-19 13:00", "exit": 1283.75, "reason": "STOP_LOSS", "gross": -3.8, "cost": 1.36, "pnl": -5.16}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2024-09-30 10:00", "entry": 3843.55, "exit_time": "2024-09-30 10:15", "exit": 3858.0, "reason": "STOP_LOSS", "gross": -14.45, "cost": 4.08, "pnl": -18.53}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2024-09-30 10:30", "entry": 5066.55, "exit_time": "2024-09-30 10:45", "exit": 5027.25, "reason": "TARGET", "gross": 39.3, "cost": 5.34, "pnl": 33.96}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2024-11-07 11:00", "entry": 1792.65, "exit_time": "2024-11-07 13:00", "exit": 1786.45, "reason": "TIME_EXIT", "gross": 6.2, "cost": 1.89, "pnl": 4.31}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2024-11-07 11:15", "entry": 4853.15, "exit_time": "2024-11-07 11:15", "exit": 4847.15, "reason": "TARGET", "gross": 6.0, "cost": 5.13, "pnl": 0.87}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2024-12-17 10:00", "entry": 648.3, "exit_time": "2024-12-17 12:00", "exit": 643.35, "reason": "TIME_EXIT", "gross": 4.95, "cost": 0.68, "pnl": 4.27}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2024-12-17 10:15", "entry": 3425.25, "exit_time": "2024-12-17 10:15", "exit": 3411.0, "reason": "TARGET", "gross": 14.25, "cost": 3.62, "pnl": 10.63}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2024-12-17 10:15", "entry": 978.55, "exit_time": "2024-12-17 12:00", "exit": 971.05, "reason": "TARGET", "gross": 7.5, "cost": 1.03, "pnl": 6.47}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2025-01-24 13:30", "entry": 5205.0, "exit_time": "2025-01-24 15:15", "exit": 5190.25, "reason": "FORCED_SQUAREOFF", "gross": 14.75, "cost": 5.5, "pnl": 9.25}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2025-01-24 13:45", "entry": 609.55, "exit_time": "2025-01-24 15:15", "exit": 607.6, "reason": "FORCED_SQUAREOFF", "gross": 1.95, "cost": 0.64, "pnl": 1.31}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2025-01-27 10:00", "entry": 3380.5, "exit_time": "2025-01-27 12:00", "exit": 3374.0, "reason": "TIME_EXIT", "gross": 6.5, "cost": 3.57, "pnl": 2.93}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2025-03-05 11:30", "entry": 1146.25, "exit_time": "2025-03-05 11:30", "exit": 1149.35, "reason": "STOP_LOSS", "gross": -3.1, "cost": 1.22, "pnl": -4.32}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2025-03-05 11:45", "entry": 3091.75, "exit_time": "2025-03-05 11:45", "exit": 3094.2, "reason": "STOP_LOSS", "gross": -2.45, "cost": 3.27, "pnl": -5.72}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2025-03-05 12:15", "entry": 882.1, "exit_time": "2025-03-05 13:15", "exit": 885.6, "reason": "STOP_LOSS", "gross": -3.5, "cost": 0.94, "pnl": -4.44}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2025-03-05 13:45", "entry": 846.0, "exit_time": "2025-03-05 15:15", "exit": 846.0, "reason": "FORCED_SQUAREOFF", "gross": 0.0, "cost": 0.9, "pnl": -0.9}, {"symbol": "INDHOTEL", "dir": "SHORT", "entry_time": "2025-04-21 10:30", "entry": 836.2, "exit_time": "2025-04-21 10:30", "exit": 839.4, "reason": "STOP_LOSS", "gross": -3.2, "cost": 0.89, "pnl": -4.09}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2025-04-21 11:00", "entry": 616.4, "exit_time": "2025-04-21 11:30", "exit": 618.65, "reason": "STOP_LOSS", "gross": -2.25, "cost": 0.65, "pnl": -2.9}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2025-04-21 11:15", "entry": 2179.3, "exit_time": "2025-04-21 12:30", "exit": 2184.4, "reason": "STOP_LOSS", "gross": -5.1, "cost": 2.31, "pnl": -7.41}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2025-04-21 12:30", "entry": 1878.3, "exit_time": "2025-04-21 12:30", "exit": 1880.7, "reason": "STOP_LOSS", "gross": -2.4, "cost": 1.99, "pnl": -4.39}, {"symbol": "HYUNDAI", "dir": "SHORT", "entry_time": "2025-05-28 10:00", "entry": 1887.5, "exit_time": "2025-05-28 11:45", "exit": 1895.8, "reason": "STOP_LOSS", "gross": -8.3, "cost": 2.0, "pnl": -10.3}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2025-05-28 10:00", "entry": 1680.3, "exit_time": "2025-05-28 12:00", "exit": 1678.4, "reason": "TIME_EXIT", "gross": 1.9, "cost": 1.78, "pnl": 0.12}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2025-05-28 10:30", "entry": 655.5, "exit_time": "2025-05-28 12:30", "exit": 652.2, "reason": "TIME_EXIT", "gross": 3.3, "cost": 0.69, "pnl": 2.61}, {"symbol": "INDHOTEL", "dir": "SHORT", "entry_time": "2025-07-04 10:45", "entry": 750.3, "exit_time": "2025-07-04 12:30", "exit": 742.95, "reason": "TARGET", "gross": 7.35, "cost": 0.79, "pnl": 6.56}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2025-07-04 12:00", "entry": 990.6, "exit_time": "2025-07-04 14:00", "exit": 993.2, "reason": "TIME_EXIT", "gross": -2.6, "cost": 1.05, "pnl": -3.65}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2025-08-06 10:15", "entry": 1942.0, "exit_time": "2025-08-06 12:15", "exit": 1930.4, "reason": "TIME_EXIT", "gross": 11.6, "cost": 2.05, "pnl": 9.55}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2025-08-06 10:30", "entry": 3418.8, "exit_time": "2025-08-06 12:00", "exit": 3433.9, "reason": "STOP_LOSS", "gross": -15.1, "cost": 3.63, "pnl": -18.73}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2025-08-06 11:00", "entry": 1209.1, "exit_time": "2025-08-06 11:15", "exit": 1217.7, "reason": "STOP_LOSS", "gross": -8.6, "cost": 1.29, "pnl": -9.89}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2025-09-11 13:30", "entry": 1179.5, "exit_time": "2025-09-11 15:15", "exit": 1181.8, "reason": "FORCED_SQUAREOFF", "gross": -2.3, "cost": 1.25, "pnl": -3.55}, {"symbol": "INDHOTEL", "dir": "SHORT", "entry_time": "2025-09-11 13:30", "entry": 776.0, "exit_time": "2025-09-11 15:15", "exit": 774.55, "reason": "FORCED_SQUAREOFF", "gross": 1.45, "cost": 0.82, "pnl": 0.63}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2025-09-12 10:00", "entry": 3570.0, "exit_time": "2025-09-12 10:00", "exit": 3581.0, "reason": "STOP_LOSS", "gross": -11.0, "cost": 3.79, "pnl": -14.79}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2025-10-14 10:00", "entry": 1659.5, "exit_time": "2025-10-14 12:00", "exit": 1655.2, "reason": "TIME_EXIT", "gross": 4.3, "cost": 1.75, "pnl": 2.55}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2025-10-14 10:30", "entry": 3270.1, "exit_time": "2025-10-14 10:30", "exit": 3273.4, "reason": "STOP_LOSS", "gross": -3.3, "cost": 3.46, "pnl": -6.76}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2025-10-14 11:00", "entry": 1005.9, "exit_time": "2025-10-14 12:00", "exit": 994.2, "reason": "TARGET", "gross": 11.7, "cost": 1.06, "pnl": 10.64}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2025-11-21 10:00", "entry": 1003.4, "exit_time": "2025-11-21 10:30", "exit": 997.1, "reason": "TARGET", "gross": 6.3, "cost": 1.06, "pnl": 5.24}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2025-11-21 10:00", "entry": 3674.8, "exit_time": "2025-11-21 11:00", "exit": 3646.3, "reason": "TARGET", "gross": 28.5, "cost": 3.87, "pnl": 24.63}, {"symbol": "HYUNDAI", "dir": "SHORT", "entry_time": "2025-12-24 12:45", "entry": 2311.3, "exit_time": "2025-12-24 14:45", "exit": 2308.2, "reason": "TIME_EXIT", "gross": 3.1, "cost": 2.44, "pnl": 0.66}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2025-12-24 13:15", "entry": 1004.1, "exit_time": "2025-12-24 15:15", "exit": 998.8, "reason": "TIME_EXIT", "gross": 5.3, "cost": 1.06, "pnl": 4.24}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2026-02-02 13:30", "entry": 921.9, "exit_time": "2026-02-02 14:45", "exit": 925.9, "reason": "STOP_LOSS", "gross": -4.0, "cost": 0.98, "pnl": -4.98}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2026-02-03 10:15", "entry": 953.7, "exit_time": "2026-02-03 10:15", "exit": 957.7, "reason": "STOP_LOSS", "gross": -4.0, "cost": 1.01, "pnl": -5.01}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2026-03-13 10:00", "entry": 862.4, "exit_time": "2026-03-13 10:30", "exit": 867.3, "reason": "STOP_LOSS", "gross": -4.9, "cost": 0.92, "pnl": -5.82}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2026-03-13 10:00", "entry": 6851.5, "exit_time": "2026-03-13 12:00", "exit": 6761.0, "reason": "TIME_EXIT", "gross": 90.5, "cost": 7.19, "pnl": 83.31}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2026-03-13 10:15", "entry": 4095.0, "exit_time": "2026-03-13 10:30", "exit": 4117.0, "reason": "STOP_LOSS", "gross": -22.0, "cost": 4.35, "pnl": -26.35}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2026-04-27 14:00", "entry": 1057.7, "exit_time": "2026-04-27 14:30", "exit": 1062.5, "reason": "STOP_LOSS", "gross": -4.8, "cost": 1.12, "pnl": -5.92}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2026-04-27 14:00", "entry": 871.0, "exit_time": "2026-04-27 14:45", "exit": 874.35, "reason": "STOP_LOSS", "gross": 305.15, "cost": 1.05, "pnl": 304.1}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2026-04-28 11:30", "entry": 1277.6, "exit_time": "2026-04-28 13:30", "exit": 1267.0, "reason": "TIME_EXIT", "gross": 10.6, "cost": 1.35, "pnl": 9.25}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2026-06-08 10:00", "entry": 7049.5, "exit_time": "2026-06-08 10:00", "exit": 7025.5, "reason": "TARGET", "gross": 24.0, "cost": 7.45, "pnl": 16.55}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2026-06-08 10:00", "entry": 1069.8, "exit_time": "2026-06-08 10:15", "exit": 1073.8, "reason": "STOP_LOSS", "gross": -4.0, "cost": 1.13, "pnl": -5.13}, {"symbol": "INDHOTEL", "dir": "SHORT", "entry_time": "2026-07-15 11:15", "entry": 741.0, "exit_time": "2026-07-15 13:15", "exit": 742.0, "reason": "TIME_EXIT", "gross": -1.0, "cost": 0.78, "pnl": -1.78}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2026-07-15 12:45", "entry": 961.95, "exit_time": "2026-07-15 14:45", "exit": 960.9, "reason": "TIME_EXIT", "gross": 1.05, "cost": 1.02, "pnl": 0.03}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2026-07-16 10:15", "entry": 3005.1, "exit_time": "2026-07-16 10:45", "exit": 3009.7, "reason": "STOP_LOSS", "gross": -4.6, "cost": 3.18, "pnl": -7.78}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2026-08-19 13:15", "entry": 8025.0, "exit_time": "2026-08-19 14:15", "exit": 7971.0, "reason": "TARGET", "gross": 54.0, "cost": 8.46, "pnl": 45.54}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2026-08-19 13:15", "entry": 1200.9, "exit_time": "2026-08-19 14:30", "exit": 1206.0, "reason": "STOP_LOSS", "gross": -5.1, "cost": 1.27, "pnl": -6.37}];
+const vetoes = [{"reason": "max_total_concurrent_positions", "count": 15735, "dominant": true}, {"reason": "outside_entry_window", "count": 7068}, {"reason": "max_concurrent_positions", "count": 6855}, {"reason": "stop_distance_exceeds_cap_after_gap", "count": 2443}, {"reason": "invalid_stop_distance_after_gap", "count": 387}];
+const bySymbol = [{"symbol": "EICHERMOT", "signals": 3596, "trades": 11, "net": 149.47}, {"symbol": "TITAN", "signals": 3462, "trades": 17, "net": -659.22}, {"symbol": "SUNPHARMA", "signals": 3392, "trades": 10, "net": -9.13}, {"symbol": "HDFCBANK", "signals": 3353, "trades": 8, "net": -9.04}, {"symbol": "MUTHOOTFIN", "signals": 3303, "trades": 12, "net": 152.54}, {"symbol": "BHARTIARTL", "signals": 3300, "trades": 11, "net": 66.43}, {"symbol": "LODHA", "signals": 3162, "trades": 11, "net": 263.38}, {"symbol": "JINDALSTEL", "signals": 2747, "trades": 9, "net": 24.89}, {"symbol": "HINDALCO", "signals": 2710, "trades": 14, "net": -13.43}, {"symbol": "INDHOTEL", "signals": 2058, "trades": 5, "net": -2.42}, {"symbol": "HYUNDAI", "signals": 1516, "trades": 2, "net": -9.64}];
+const symbolGroups = [{"symbol": "TITAN", "trades": [{"symbol": "TITAN", "dir": "SHORT", "entry_time": "2022-01-03 10:15", "entry": 2507.0, "exit_time": "2022-01-03 12:15", "exit": 2508.75, "reason": "TIME_EXIT", "gross": -1.75, "cost": 2.65, "pnl": -4.4}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2022-04-04 13:00", "entry": 2519.0, "exit_time": "2022-04-04 13:15", "exit": 2527.0, "reason": "STOP_LOSS", "gross": -8.0, "cost": 2.67, "pnl": -10.67}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2022-07-22 10:45", "entry": 2321.1, "exit_time": "2022-07-22 12:30", "exit": 2329.0, "reason": "STOP_LOSS", "gross": -7.9, "cost": 2.46, "pnl": -10.36}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2022-09-08 12:15", "entry": 2639.0, "exit_time": "2022-09-08 12:15", "exit": 2630.0, "reason": "TARGET", "gross": 9.0, "cost": 2.79, "pnl": 6.21}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2023-03-03 10:15", "entry": 2377.5, "exit_time": "2023-03-03 10:45", "exit": 2385.0, "reason": "STOP_LOSS", "gross": -7.5, "cost": 2.52, "pnl": -10.02}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2023-04-19 10:00", "entry": 2579.0, "exit_time": "2023-04-19 12:00", "exit": 2573.55, "reason": "TIME_EXIT", "gross": 5.45, "cost": 2.73, "pnl": 2.72}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2023-05-22 10:15", "entry": 2717.9, "exit_time": "2023-05-22 12:15", "exit": 2725.4, "reason": "TIME_EXIT", "gross": -347.9, "cost": 2.74, "pnl": -350.64}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2023-09-01 10:00", "entry": 3110.7, "exit_time": "2023-09-01 12:00", "exit": 3113.95, "reason": "TIME_EXIT", "gross": -3.25, "cost": 3.29, "pnl": -6.54}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2023-10-16 11:00", "entry": 3318.35, "exit_time": "2023-10-16 13:00", "exit": 3304.75, "reason": "TIME_EXIT", "gross": -194.05, "cost": 3.42, "pnl": -197.47}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2024-01-10 10:15", "entry": 3725.45, "exit_time": "2024-01-10 10:15", "exit": 3729.0, "reason": "STOP_LOSS", "gross": -3.55, "cost": 3.94, "pnl": -7.49}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2024-09-30 10:00", "entry": 3843.55, "exit_time": "2024-09-30 10:15", "exit": 3858.0, "reason": "STOP_LOSS", "gross": -14.45, "cost": 4.08, "pnl": -18.53}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2024-12-17 10:15", "entry": 3425.25, "exit_time": "2024-12-17 10:15", "exit": 3411.0, "reason": "TARGET", "gross": 14.25, "cost": 3.62, "pnl": 10.63}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2025-01-27 10:00", "entry": 3380.5, "exit_time": "2025-01-27 12:00", "exit": 3374.0, "reason": "TIME_EXIT", "gross": 6.5, "cost": 3.57, "pnl": 2.93}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2025-03-05 11:45", "entry": 3091.75, "exit_time": "2025-03-05 11:45", "exit": 3094.2, "reason": "STOP_LOSS", "gross": -2.45, "cost": 3.27, "pnl": -5.72}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2025-08-06 10:30", "entry": 3418.8, "exit_time": "2025-08-06 12:00", "exit": 3433.9, "reason": "STOP_LOSS", "gross": -15.1, "cost": 3.63, "pnl": -18.73}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2025-09-12 10:00", "entry": 3570.0, "exit_time": "2025-09-12 10:00", "exit": 3581.0, "reason": "STOP_LOSS", "gross": -11.0, "cost": 3.79, "pnl": -14.79}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2026-03-13 10:15", "entry": 4095.0, "exit_time": "2026-03-13 10:30", "exit": 4117.0, "reason": "STOP_LOSS", "gross": -22.0, "cost": 4.35, "pnl": -26.35}], "count": 17, "wins": 4, "win_rate": 24, "gross": -603.7, "cost": 55.52, "net": -659.22}, {"symbol": "HINDALCO", "trades": [{"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2022-01-03 10:30", "entry": 473.9, "exit_time": "2022-01-03 12:30", "exit": 474.0, "reason": "TIME_EXIT", "gross": -0.1, "cost": 0.5, "pnl": -0.6}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2022-10-27 13:15", "entry": 411.2, "exit_time": "2022-10-27 15:15", "exit": 412.15, "reason": "TIME_EXIT", "gross": -0.95, "cost": 0.44, "pnl": -1.39}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2023-06-21 10:15", "entry": 424.8, "exit_time": "2023-06-21 11:45", "exit": 418.65, "reason": "TARGET", "gross": 6.15, "cost": 0.45, "pnl": 5.7}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2023-11-28 10:30", "entry": 516.5, "exit_time": "2023-11-28 12:30", "exit": 516.25, "reason": "TIME_EXIT", "gross": 0.25, "cost": 0.55, "pnl": -0.3}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2024-01-10 10:15", "entry": 573.45, "exit_time": "2024-01-10 11:00", "exit": 575.5, "reason": "STOP_LOSS", "gross": -2.05, "cost": 0.61, "pnl": -2.66}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2024-07-09 12:00", "entry": 699.8, "exit_time": "2024-07-09 12:30", "exit": 702.5, "reason": "STOP_LOSS", "gross": -2.7, "cost": 0.74, "pnl": -3.44}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2024-12-17 10:00", "entry": 648.3, "exit_time": "2024-12-17 12:00", "exit": 643.35, "reason": "TIME_EXIT", "gross": 4.95, "cost": 0.68, "pnl": 4.27}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2025-01-24 13:45", "entry": 609.55, "exit_time": "2025-01-24 15:15", "exit": 607.6, "reason": "FORCED_SQUAREOFF", "gross": 1.95, "cost": 0.64, "pnl": 1.31}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2025-04-21 11:00", "entry": 616.4, "exit_time": "2025-04-21 11:30", "exit": 618.65, "reason": "STOP_LOSS", "gross": -2.25, "cost": 0.65, "pnl": -2.9}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2025-05-28 10:30", "entry": 655.5, "exit_time": "2025-05-28 12:30", "exit": 652.2, "reason": "TIME_EXIT", "gross": 3.3, "cost": 0.69, "pnl": 2.61}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2026-02-03 10:15", "entry": 953.7, "exit_time": "2026-02-03 10:15", "exit": 957.7, "reason": "STOP_LOSS", "gross": -4.0, "cost": 1.01, "pnl": -5.01}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2026-04-27 14:00", "entry": 1057.7, "exit_time": "2026-04-27 14:30", "exit": 1062.5, "reason": "STOP_LOSS", "gross": -4.8, "cost": 1.12, "pnl": -5.92}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2026-06-08 10:00", "entry": 1069.8, "exit_time": "2026-06-08 10:15", "exit": 1073.8, "reason": "STOP_LOSS", "gross": -4.0, "cost": 1.13, "pnl": -5.13}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2026-07-15 12:45", "entry": 961.95, "exit_time": "2026-07-15 14:45", "exit": 960.9, "reason": "TIME_EXIT", "gross": 1.05, "cost": 1.02, "pnl": 0.03}], "count": 14, "wins": 5, "win_rate": 36, "gross": -3.2, "cost": 10.23, "net": -13.43}, {"symbol": "MUTHOOTFIN", "trades": [{"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2022-04-04 13:00", "entry": 1349.45, "exit_time": "2022-04-04 13:00", "exit": 1352.6, "reason": "STOP_LOSS", "gross": -3.15, "cost": 1.43, "pnl": -4.58}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2022-06-06 10:15", "entry": 1071.0, "exit_time": "2022-06-06 10:45", "exit": 1077.65, "reason": "STOP_LOSS", "gross": -6.65, "cost": 1.14, "pnl": -7.79}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2022-07-22 10:30", "entry": 1047.05, "exit_time": "2022-07-22 10:45", "exit": 1040.45, "reason": "TARGET", "gross": 6.6, "cost": 1.1, "pnl": 5.5}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2023-01-17 11:00", "entry": 1054.25, "exit_time": "2023-01-17 13:00", "exit": 1049.05, "reason": "TIME_EXIT", "gross": 5.2, "cost": 1.11, "pnl": 4.09}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2024-01-10 10:30", "entry": 1465.05, "exit_time": "2024-01-10 12:30", "exit": 1459.45, "reason": "TIME_EXIT", "gross": 5.6, "cost": 1.55, "pnl": 4.05}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2024-02-26 10:30", "entry": 1316.85, "exit_time": "2024-02-26 12:30", "exit": 1310.5, "reason": "TIME_EXIT", "gross": 154.55, "cost": 1.45, "pnl": 153.1}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2024-05-29 10:45", "entry": 1741.9, "exit_time": "2024-05-29 12:45", "exit": 1745.0, "reason": "TIME_EXIT", "gross": -3.1, "cost": 1.85, "pnl": -4.95}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2024-08-19 12:15", "entry": 1853.0, "exit_time": "2024-08-19 14:15", "exit": 1850.6, "reason": "TIME_EXIT", "gross": 2.4, "cost": 1.96, "pnl": 0.44}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2025-04-21 11:15", "entry": 2179.3, "exit_time": "2025-04-21 12:30", "exit": 2184.4, "reason": "STOP_LOSS", "gross": -5.1, "cost": 2.31, "pnl": -7.41}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2025-10-14 10:30", "entry": 3270.1, "exit_time": "2025-10-14 10:30", "exit": 3273.4, "reason": "STOP_LOSS", "gross": -3.3, "cost": 3.46, "pnl": -6.76}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2025-11-21 10:00", "entry": 3674.8, "exit_time": "2025-11-21 11:00", "exit": 3646.3, "reason": "TARGET", "gross": 28.5, "cost": 3.87, "pnl": 24.63}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2026-07-16 10:15", "entry": 3005.1, "exit_time": "2026-07-16 10:45", "exit": 3009.7, "reason": "STOP_LOSS", "gross": -4.6, "cost": 3.18, "pnl": -7.78}], "count": 12, "wins": 6, "win_rate": 50, "gross": 176.95, "cost": 24.41, "net": 152.54}, {"symbol": "BHARTIARTL", "trades": [{"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2022-01-03 11:30", "entry": 688.0, "exit_time": "2022-01-03 12:15", "exit": 690.6, "reason": "STOP_LOSS", "gross": -2.6, "cost": 0.73, "pnl": -3.33}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2022-04-04 12:30", "entry": 765.8, "exit_time": "2022-04-04 13:00", "exit": 768.5, "reason": "STOP_LOSS", "gross": -2.7, "cost": 0.81, "pnl": -3.51}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2022-07-22 10:00", "entry": 676.2, "exit_time": "2022-07-22 12:00", "exit": 678.55, "reason": "TIME_EXIT", "gross": -2.35, "cost": 0.72, "pnl": -3.07}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2022-12-02 11:00", "entry": 843.95, "exit_time": "2022-12-02 13:00", "exit": 841.45, "reason": "TIME_EXIT", "gross": 2.5, "cost": 0.89, "pnl": 1.61}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2023-01-17 10:00", "entry": 763.05, "exit_time": "2023-01-17 11:30", "exit": 765.2, "reason": "STOP_LOSS", "gross": 78.75, "cost": 0.84, "pnl": 77.91}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2023-05-22 10:15", "entry": 802.0, "exit_time": "2023-05-22 12:15", "exit": 803.2, "reason": "TIME_EXIT", "gross": -1.2, "cost": 0.85, "pnl": -2.05}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2023-06-21 10:15", "entry": 833.8, "exit_time": "2023-06-21 11:45", "exit": 837.0, "reason": "STOP_LOSS", "gross": -3.2, "cost": 0.88, "pnl": -4.08}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2023-08-31 14:00", "entry": 856.5, "exit_time": "2023-08-31 15:15", "exit": 857.05, "reason": "FORCED_SQUAREOFF", "gross": -0.55, "cost": 0.91, "pnl": -1.46}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2024-08-19 12:00", "entry": 1467.4, "exit_time": "2024-08-19 14:00", "exit": 1466.6, "reason": "TIME_EXIT", "gross": 0.8, "cost": 1.55, "pnl": -0.75}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2025-04-21 12:30", "entry": 1878.3, "exit_time": "2025-04-21 12:30", "exit": 1880.7, "reason": "STOP_LOSS", "gross": -2.4, "cost": 1.99, "pnl": -4.39}, {"symbol": "BHARTIARTL", "dir": "SHORT", "entry_time": "2025-08-06 10:15", "entry": 1942.0, "exit_time": "2025-08-06 12:15", "exit": 1930.4, "reason": "TIME_EXIT", "gross": 11.6, "cost": 2.05, "pnl": 9.55}], "count": 11, "wins": 3, "win_rate": 27, "gross": 78.65, "cost": 12.22, "net": 66.43}, {"symbol": "LODHA", "trades": [{"symbol": "LODHA", "dir": "SHORT", "entry_time": "2022-06-06 10:15", "entry": 531.3, "exit_time": "2022-06-06 10:15", "exit": 533.75, "reason": "STOP_LOSS", "gross": -2.45, "cost": 0.56, "pnl": -3.01}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2022-09-08 11:30", "entry": 551.5, "exit_time": "2022-09-08 11:45", "exit": 554.4, "reason": "STOP_LOSS", "gross": -2.9, "cost": 0.59, "pnl": -3.49}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2022-10-27 11:45", "entry": 509.45, "exit_time": "2022-10-27 13:45", "exit": 506.95, "reason": "TIME_EXIT", "gross": 2.5, "cost": 0.54, "pnl": 1.96}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2023-07-27 10:30", "entry": 722.9, "exit_time": "2023-07-27 12:30", "exit": 723.2, "reason": "TIME_EXIT", "gross": -0.3, "cost": 0.77, "pnl": -1.07}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2024-08-19 12:30", "entry": 1279.95, "exit_time": "2024-08-19 13:00", "exit": 1283.75, "reason": "STOP_LOSS", "gross": -3.8, "cost": 1.36, "pnl": -5.16}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2025-03-05 11:30", "entry": 1146.25, "exit_time": "2025-03-05 11:30", "exit": 1149.35, "reason": "STOP_LOSS", "gross": -3.1, "cost": 1.22, "pnl": -4.32}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2025-08-06 11:00", "entry": 1209.1, "exit_time": "2025-08-06 11:15", "exit": 1217.7, "reason": "STOP_LOSS", "gross": -8.6, "cost": 1.29, "pnl": -9.89}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2025-09-11 13:30", "entry": 1179.5, "exit_time": "2025-09-11 15:15", "exit": 1181.8, "reason": "FORCED_SQUAREOFF", "gross": -2.3, "cost": 1.25, "pnl": -3.55}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2026-03-13 10:00", "entry": 862.4, "exit_time": "2026-03-13 10:30", "exit": 867.3, "reason": "STOP_LOSS", "gross": -4.9, "cost": 0.92, "pnl": -5.82}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2026-04-27 14:00", "entry": 871.0, "exit_time": "2026-04-27 14:45", "exit": 874.35, "reason": "STOP_LOSS", "gross": 305.15, "cost": 1.05, "pnl": 304.1}, {"symbol": "LODHA", "dir": "SHORT", "entry_time": "2026-08-19 13:15", "entry": 1200.9, "exit_time": "2026-08-19 14:30", "exit": 1206.0, "reason": "STOP_LOSS", "gross": -5.1, "cost": 1.27, "pnl": -6.37}], "count": 11, "wins": 2, "win_rate": 18, "gross": 274.2, "cost": 10.82, "net": 263.38}, {"symbol": "EICHERMOT", "trades": [{"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2022-12-02 11:00", "entry": 3346.65, "exit_time": "2022-12-02 13:00", "exit": 3338.05, "reason": "TIME_EXIT", "gross": 8.6, "cost": 3.54, "pnl": 5.06}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2023-03-03 11:15", "entry": 3130.65, "exit_time": "2023-03-03 13:15", "exit": 3122.2, "reason": "TIME_EXIT", "gross": 8.45, "cost": 3.31, "pnl": 5.14}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2024-01-10 10:15", "entry": 3816.7, "exit_time": "2024-01-10 11:00", "exit": 3822.0, "reason": "STOP_LOSS", "gross": -5.3, "cost": 4.04, "pnl": -9.34}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2024-02-26 10:00", "entry": 3905.65, "exit_time": "2024-02-26 10:45", "exit": 3927.8, "reason": "STOP_LOSS", "gross": -22.15, "cost": 4.15, "pnl": -26.3}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2024-07-09 12:00", "entry": 4787.3, "exit_time": "2024-07-09 12:30", "exit": 4796.8, "reason": "STOP_LOSS", "gross": -9.5, "cost": 5.07, "pnl": -14.57}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2024-09-30 10:30", "entry": 5066.55, "exit_time": "2024-09-30 10:45", "exit": 5027.25, "reason": "TARGET", "gross": 39.3, "cost": 5.34, "pnl": 33.96}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2024-11-07 11:15", "entry": 4853.15, "exit_time": "2024-11-07 11:15", "exit": 4847.15, "reason": "TARGET", "gross": 6.0, "cost": 5.13, "pnl": 0.87}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2025-01-24 13:30", "entry": 5205.0, "exit_time": "2025-01-24 15:15", "exit": 5190.25, "reason": "FORCED_SQUAREOFF", "gross": 14.75, "cost": 5.5, "pnl": 9.25}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2026-03-13 10:00", "entry": 6851.5, "exit_time": "2026-03-13 12:00", "exit": 6761.0, "reason": "TIME_EXIT", "gross": 90.5, "cost": 7.19, "pnl": 83.31}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2026-06-08 10:00", "entry": 7049.5, "exit_time": "2026-06-08 10:00", "exit": 7025.5, "reason": "TARGET", "gross": 24.0, "cost": 7.45, "pnl": 16.55}, {"symbol": "EICHERMOT", "dir": "SHORT", "entry_time": "2026-08-19 13:15", "entry": 8025.0, "exit_time": "2026-08-19 14:15", "exit": 7971.0, "reason": "TARGET", "gross": 54.0, "cost": 8.46, "pnl": 45.54}], "count": 11, "wins": 8, "win_rate": 73, "gross": 208.65, "cost": 59.18, "net": 149.47}, {"symbol": "SUNPHARMA", "trades": [{"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2022-01-03 10:30", "entry": 843.0, "exit_time": "2022-01-03 11:15", "exit": 848.65, "reason": "STOP_LOSS", "gross": -5.65, "cost": 0.9, "pnl": -6.55}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2022-06-06 10:00", "entry": 865.6, "exit_time": "2022-06-06 10:15", "exit": 869.8, "reason": "STOP_LOSS", "gross": -4.2, "cost": 0.92, "pnl": -5.12}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2022-09-08 12:15", "entry": 891.0, "exit_time": "2022-09-08 14:00", "exit": 893.5, "reason": "STOP_LOSS", "gross": -2.5, "cost": 0.94, "pnl": -3.44}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2023-04-19 10:00", "entry": 998.4, "exit_time": "2023-04-19 11:15", "exit": 1002.2, "reason": "STOP_LOSS", "gross": -3.8, "cost": 1.06, "pnl": -4.86}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2023-11-28 10:45", "entry": 1191.65, "exit_time": "2023-11-28 12:00", "exit": 1193.85, "reason": "STOP_LOSS", "gross": -2.2, "cost": 1.26, "pnl": -3.46}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2024-02-26 10:00", "entry": 1560.7, "exit_time": "2024-02-26 12:00", "exit": 1561.0, "reason": "TIME_EXIT", "gross": -0.3, "cost": 1.65, "pnl": -1.95}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2024-04-12 12:30", "entry": 1550.95, "exit_time": "2024-04-12 14:30", "exit": 1540.05, "reason": "TIME_EXIT", "gross": 10.9, "cost": 1.63, "pnl": 9.27}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2024-11-07 11:00", "entry": 1792.65, "exit_time": "2024-11-07 13:00", "exit": 1786.45, "reason": "TIME_EXIT", "gross": 6.2, "cost": 1.89, "pnl": 4.31}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2025-05-28 10:00", "entry": 1680.3, "exit_time": "2025-05-28 12:00", "exit": 1678.4, "reason": "TIME_EXIT", "gross": 1.9, "cost": 1.78, "pnl": 0.12}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2025-10-14 10:00", "entry": 1659.5, "exit_time": "2025-10-14 12:00", "exit": 1655.2, "reason": "TIME_EXIT", "gross": 4.3, "cost": 1.75, "pnl": 2.55}], "count": 10, "wins": 4, "win_rate": 40, "gross": 4.65, "cost": 13.78, "net": -9.13}, {"symbol": "JINDALSTEL", "trades": [{"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2022-12-02 12:00", "entry": 561.8, "exit_time": "2022-12-02 12:15", "exit": 564.1, "reason": "STOP_LOSS", "gross": -2.3, "cost": 0.6, "pnl": -2.9}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2023-01-17 11:00", "entry": 584.15, "exit_time": "2023-01-17 13:00", "exit": 580.65, "reason": "TIME_EXIT", "gross": 3.5, "cost": 0.62, "pnl": 2.88}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2023-07-27 10:00", "entry": 660.8, "exit_time": "2023-07-27 12:00", "exit": 660.4, "reason": "TIME_EXIT", "gross": 0.4, "cost": 0.7, "pnl": -0.3}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2024-05-29 10:45", "entry": 1040.3, "exit_time": "2024-05-29 12:45", "exit": 1040.15, "reason": "TIME_EXIT", "gross": 0.15, "cost": 1.1, "pnl": -0.95}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2024-12-17 10:15", "entry": 978.55, "exit_time": "2024-12-17 12:00", "exit": 971.05, "reason": "TARGET", "gross": 7.5, "cost": 1.03, "pnl": 6.47}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2025-03-05 12:15", "entry": 882.1, "exit_time": "2025-03-05 13:15", "exit": 885.6, "reason": "STOP_LOSS", "gross": -3.5, "cost": 0.94, "pnl": -4.44}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2025-10-14 11:00", "entry": 1005.9, "exit_time": "2025-10-14 12:00", "exit": 994.2, "reason": "TARGET", "gross": 11.7, "cost": 1.06, "pnl": 10.64}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2025-12-24 13:15", "entry": 1004.1, "exit_time": "2025-12-24 15:15", "exit": 998.8, "reason": "TIME_EXIT", "gross": 5.3, "cost": 1.06, "pnl": 4.24}, {"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2026-04-28 11:30", "entry": 1277.6, "exit_time": "2026-04-28 13:30", "exit": 1267.0, "reason": "TIME_EXIT", "gross": 10.6, "cost": 1.35, "pnl": 9.25}], "count": 9, "wins": 5, "win_rate": 56, "gross": 33.35, "cost": 8.46, "net": 24.89}, {"symbol": "HDFCBANK", "trades": [{"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2022-10-27 11:30", "entry": 728.8, "exit_time": "2022-10-27 13:30", "exit": 727.5, "reason": "TIME_EXIT", "gross": 1.3, "cost": 0.77, "pnl": 0.53}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2023-05-22 10:15", "entry": 822.7, "exit_time": "2023-05-22 12:15", "exit": 820.5, "reason": "TIME_EXIT", "gross": 2.2, "cost": 0.87, "pnl": 1.33}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2023-10-16 11:00", "entry": 763.4, "exit_time": "2023-10-16 11:30", "exit": 766.3, "reason": "STOP_LOSS", "gross": -2.9, "cost": 0.81, "pnl": -3.71}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2024-04-15 10:00", "entry": 752.0, "exit_time": "2024-04-15 10:30", "exit": 754.1, "reason": "STOP_LOSS", "gross": -2.1, "cost": 0.8, "pnl": -2.9}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2025-03-05 13:45", "entry": 846.0, "exit_time": "2025-03-05 15:15", "exit": 846.0, "reason": "FORCED_SQUAREOFF", "gross": 0.0, "cost": 0.9, "pnl": -0.9}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2025-07-04 12:00", "entry": 990.6, "exit_time": "2025-07-04 14:00", "exit": 993.2, "reason": "TIME_EXIT", "gross": -2.6, "cost": 1.05, "pnl": -3.65}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2025-11-21 10:00", "entry": 1003.4, "exit_time": "2025-11-21 10:30", "exit": 997.1, "reason": "TARGET", "gross": 6.3, "cost": 1.06, "pnl": 5.24}, {"symbol": "HDFCBANK", "dir": "SHORT", "entry_time": "2026-02-02 13:30", "entry": 921.9, "exit_time": "2026-02-02 14:45", "exit": 925.9, "reason": "STOP_LOSS", "gross": -4.0, "cost": 0.98, "pnl": -4.98}], "count": 8, "wins": 3, "win_rate": 38, "gross": -1.8, "cost": 7.24, "net": -9.04}, {"symbol": "INDHOTEL", "trades": [{"symbol": "INDHOTEL", "dir": "SHORT", "entry_time": "2024-04-12 12:30", "entry": 605.85, "exit_time": "2024-04-12 12:45", "exit": 608.95, "reason": "STOP_LOSS", "gross": -3.1, "cost": 0.64, "pnl": -3.74}, {"symbol": "INDHOTEL", "dir": "SHORT", "entry_time": "2025-04-21 10:30", "entry": 836.2, "exit_time": "2025-04-21 10:30", "exit": 839.4, "reason": "STOP_LOSS", "gross": -3.2, "cost": 0.89, "pnl": -4.09}, {"symbol": "INDHOTEL", "dir": "SHORT", "entry_time": "2025-07-04 10:45", "entry": 750.3, "exit_time": "2025-07-04 12:30", "exit": 742.95, "reason": "TARGET", "gross": 7.35, "cost": 0.79, "pnl": 6.56}, {"symbol": "INDHOTEL", "dir": "SHORT", "entry_time": "2025-09-11 13:30", "entry": 776.0, "exit_time": "2025-09-11 15:15", "exit": 774.55, "reason": "FORCED_SQUAREOFF", "gross": 1.45, "cost": 0.82, "pnl": 0.63}, {"symbol": "INDHOTEL", "dir": "SHORT", "entry_time": "2026-07-15 11:15", "entry": 741.0, "exit_time": "2026-07-15 13:15", "exit": 742.0, "reason": "TIME_EXIT", "gross": -1.0, "cost": 0.78, "pnl": -1.78}], "count": 5, "wins": 2, "win_rate": 40, "gross": 1.5, "cost": 3.92, "net": -2.42}, {"symbol": "HYUNDAI", "trades": [{"symbol": "HYUNDAI", "dir": "SHORT", "entry_time": "2025-05-28 10:00", "entry": 1887.5, "exit_time": "2025-05-28 11:45", "exit": 1895.8, "reason": "STOP_LOSS", "gross": -8.3, "cost": 2.0, "pnl": -10.3}, {"symbol": "HYUNDAI", "dir": "SHORT", "entry_time": "2025-12-24 12:45", "entry": 2311.3, "exit_time": "2025-12-24 14:45", "exit": 2308.2, "reason": "TIME_EXIT", "gross": 3.1, "cost": 2.44, "pnl": 0.66}], "count": 2, "wins": 1, "win_rate": 50, "gross": -5.2, "cost": 4.44, "net": -9.64}];
+
+// ---- reusable: render a trade table into a <tbody> ----
+function renderTradeTable(tbody, tradeList, showSymbol) {
+  if (tradeList.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" class="empty-note">No trades filled.</td></tr>`;
+    return;
+  }
+  tradeList.forEach(t => {
+    const tr = document.createElement("tr");
+    const pnlClass = t.pnl >= 0 ? "pos" : "neg";
+    const sign = t.pnl >= 0 ? "+" : "−";
+    const grossClass = t.gross >= 0 ? "pos" : "neg";
+    const grossSign = t.gross >= 0 ? "+" : "−";
+    tr.innerHTML = `
+      ${showSymbol ? `<td class="sym">${t.symbol}</td>` : ""}
+      <td><span class="badge ${t.dir.toLowerCase()}">${t.dir}</span></td>
+      <td>${t.entry_time}</td>
+      <td class="num">${t.entry.toFixed(2)}</td>
+      <td>${t.exit_time}</td>
+      <td class="num">${t.exit.toFixed(2)}</td>
+      <td>${t.reason}</td>
+      <td class="num pnl ${grossClass}">${grossSign}₹${Math.abs(t.gross).toFixed(2)}</td>
+      <td class="num">−₹${t.cost.toFixed(2)}</td>
+      <td class="num pnl ${pnlClass}">${sign}₹${Math.abs(t.pnl).toFixed(2)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ---- reusable: render a cumulative-P&L equity curve into an <svg> ----
+function renderEquityCurve(svg, tooltip, tradeList, opts) {
+  opts = opts || {};
+  const H = opts.height || 220, showAxisLabels = opts.labels !== false;
+  if (tradeList.length === 0) {
+    svg.outerHTML = `<div class="empty-note">No trades to chart.</div>`;
+    return;
+  }
+  const cum = [];
+  let running = 0;
+  tradeList.forEach((t) => { running += t.pnl; cum.push({val: running, trade: t}); });
+  cum.unshift({val: 0, trade: null});
+
+  const W = 800, padL = showAxisLabels ? 50 : 16, padR = 20, padT = 12, padB = showAxisLabels ? 30 : 12;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+
+  const minV = Math.min(0, ...cum.map(p => p.val));
+  const maxV = Math.max(0, ...cum.map(p => p.val));
+  const spanV = (maxV - minV) || 1;
+  const xFor = i => padL + (i / (cum.length - 1)) * plotW;
+  const yFor = v => padT + plotH - ((v - minV) / spanV) * plotH;
+
+  let svgHTML = "";
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+
+  if (showAxisLabels) {
+    const steps = 4;
+    for (let s = 0; s <= steps; s++) {
+      const v = minV + (spanV * s / steps);
+      const y = yFor(v);
+      svgHTML += `<line class="grid-line" x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" />`;
+      svgHTML += `<text class="axis-label" x="${padL-8}" y="${y+4}" text-anchor="end">₹${v.toFixed(0)}</text>`;
+    }
+  }
+  const zeroY = yFor(0);
+  svgHTML += `<line class="baseline" x1="${padL}" y1="${zeroY}" x2="${W-padR}" y2="${zeroY}" />`;
+
+  const pathD = cum.map((p, idx) => `${idx === 0 ? "M" : "L"} ${xFor(idx)} ${yFor(p.val)}`).join(" ");
+  svgHTML += `<path class="equity-line" d="${pathD}" />`;
+
+  const dotR = tradeList.length > 60 ? 2.5 : 5;
+  cum.forEach((p, idx) => {
+    const cls = idx === 0 ? "" : (p.val >= cum[idx-1].val ? "pos" : "neg");
+    svgHTML += `<circle class="equity-dot ${cls}" cx="${xFor(idx)}" cy="${yFor(p.val)}" r="${dotR}" data-idx="${idx}" style="cursor:pointer" />`;
+    if (showAxisLabels) {
+      const label = idx === 0 ? "Start" : cum[idx].trade.symbol;
+      svgHTML += `<text class="axis-label" x="${xFor(idx)}" y="${H-8}" text-anchor="middle">${label}</text>`;
+    }
+  });
+
+  svg.innerHTML = svgHTML;
+
+  svg.querySelectorAll("circle").forEach(circle => {
+    circle.addEventListener("mouseenter", () => {
+      const idx = +circle.dataset.idx;
+      const p = cum[idx];
+      const rect = svg.getBoundingClientRect();
+      tooltip.style.left = (xFor(idx) / W * rect.width) + "px";
+      tooltip.style.top = (yFor(p.val) / H * rect.height) + "px";
+      tooltip.textContent = idx === 0
+        ? "Start: ₹0.00"
+        : `${p.trade.symbol} ${p.trade.entry_time} (${p.trade.dir}, ${p.trade.reason}): ${p.trade.pnl>=0?"+":"−"}₹${Math.abs(p.trade.pnl).toFixed(2)} → cum ₹${p.val.toFixed(2)}`;
+      tooltip.style.opacity = 1;
+    });
+    circle.addEventListener("mouseleave", () => { tooltip.style.opacity = 0; });
+  });
+}
+
+// ---- per-symbol cards: one equity curve + one collapsible trade table each ----
+const cardsWrap = document.getElementById("symbol-cards");
+if (symbolGroups.length === 0) {
+  cardsWrap.innerHTML = `<p class="empty-note">No trades filled in this run.</p>`;
+}
+symbolGroups.forEach((g, i) => {
+  const card = document.createElement("section");
+  card.className = "symbol-card";
+  const netClass = g.net > 0 ? "pos" : (g.net < 0 ? "neg" : "");
+  const netSign = g.net > 0 ? "+" : (g.net < 0 ? "−" : "");
+  card.innerHTML = `
+    <div class="symbol-card-head">
+      <h3>${g.symbol}</h3>
+      <div class="symbol-card-stats">
+        <span>Trades: <b>${g.count}</b></span>
+        <span>Win rate: <b>${g.win_rate}%</b> (${g.wins}/${g.count})</span>
+        <span>Gross: <b>${g.gross>=0?"+":"−"}₹${Math.abs(g.gross).toFixed(2)}</b></span>
+        <span>Charges: <b>₹${g.cost.toFixed(2)}</b></span>
+        <span>Net: <b class="${netClass}">${netSign}₹${Math.abs(g.net).toFixed(2)}</b></span>
+      </div>
+    </div>
+    <div class="symbol-chart-wrap">
+      <svg id="sym-chart-${i}" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="tooltip" id="sym-tooltip-${i}"></div>
+    </div>
+    <details class="symbol-trades">
+      <summary>Show ${g.count} trade${g.count === 1 ? "" : "s"}</summary>
+      <table>
+        <thead>
+          <tr><th>Dir</th><th>Entry</th><th class="num">Entry px</th><th>Exit</th><th class="num">Exit px</th><th>Reason</th><th class="num">Gross</th><th class="num">Charges</th><th class="num">Net P&amp;L</th></tr>
+        </thead>
+        <tbody id="sym-trades-${i}"></tbody>
+      </table>
+    </details>
+  `;
+  cardsWrap.appendChild(card);
+
+  renderEquityCurve(
+    document.getElementById(`sym-chart-${i}`), document.getElementById(`sym-tooltip-${i}`),
+    g.trades, {height: 90, labels: false},
+  );
+  renderTradeTable(document.getElementById(`sym-trades-${i}`), g.trades, false);
+});
+
+// ---- per-symbol activity overview table ----
+const symBody = document.getElementById("symbol-body");
+bySymbol.forEach(s => {
+  const tr = document.createElement("tr");
+  const pnlClass = s.net > 0 ? "pos" : (s.net < 0 ? "neg" : "");
+  const sign = s.net > 0 ? "+" : (s.net < 0 ? "−" : "");
+  tr.innerHTML = `
+    <td class="sym">${s.symbol}</td>
+    <td class="num">${s.signals}</td>
+    <td class="num">${s.trades}</td>
+    <td class="num pnl ${pnlClass}">${s.net === 0 ? "—" : sign + "₹" + Math.abs(s.net).toFixed(2)}</td>
+  `;
+  symBody.appendChild(tr);
+});
+
+// ---- veto bars ----
+const vetoWrap = document.getElementById("veto-bars");
+if (vetoes.length === 0) {
+  vetoWrap.innerHTML = `<div class="empty-note">No signals were vetoed.</div>`;
+}
+const maxVeto = vetoes.length ? Math.max(...vetoes.map(v => v.count)) : 1;
+vetoes.forEach(v => {
+  const row = document.createElement("div");
+  row.className = "veto-row";
+  const pct = (v.count / maxVeto) * 100;
+  row.innerHTML = `
+    <div>${v.reason}</div>
+    <div class="veto-bar-bg"><div class="veto-bar-fill${v.dominant ? " dominant" : ""}" style="width:${pct}%"></div></div>
+    <div class="num">${v.count}</div>
+  `;
+  vetoWrap.appendChild(row);
+});
+
+// ---- overall equity curve (cumulative P&L across every trade, every symbol) ----
+renderEquityCurve(document.getElementById("equity-chart"), document.getElementById("tooltip"), trades, {height: 220});
+</script>
+</body>
+</html>

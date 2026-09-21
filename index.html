@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en" data-theme="">
+<head>
+<meta charset="utf-8">
+<title>Rushil Agent Bot — System Overview</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f5f1e8;
+    --surface: #fffdf8;
+    --surface-2: #eee7d6;
+    --text-1: #1d1a15;
+    --text-2: #5b5648;
+    --muted: #8a8471;
+    --border: rgba(29,26,21,0.12);
+    --accent: #a8690f;
+    --accent-ink: #ffffff;
+    --accent-soft: #f0dcae;
+    --long: #1c7a44;
+    --long-soft: #dcefe1;
+    --short: #ac3226;
+    --short-soft: #f6dfda;
+    --cyan: #1c7278;
+    --cyan-soft: #d9ecec;
+    --code-bg: #efe8d6;
+    --shadow: 0 1px 2px rgba(29,26,21,0.06), 0 8px 24px rgba(29,26,21,0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #16141a;
+      --surface: #1f1c24;
+      --surface-2: #272330;
+      --text-1: #f2eee2;
+      --text-2: #b6b0a0;
+      --muted: #837c6d;
+      --border: rgba(255,255,255,0.10);
+      --accent: #e3a53a;
+      --accent-ink: #1a1509;
+      --accent-soft: #3d2f14;
+      --long: #4fc283;
+      --long-soft: #16321f;
+      --short: #e2766a;
+      --short-soft: #3a1a16;
+      --cyan: #57c4cb;
+      --cyan-soft: #123033;
+      --code-bg: #241f2b;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #16141a;
+    --surface: #1f1c24;
+    --surface-2: #272330;
+    --text-1: #f2eee2;
+    --text-2: #b6b0a0;
+    --muted: #837c6d;
+    --border: rgba(255,255,255,0.10);
+    --accent: #e3a53a;
+    --accent-ink: #1a1509;
+    --accent-soft: #3d2f14;
+    --long: #4fc283;
+    --long-soft: #16321f;
+    --short: #e2766a;
+    --short-soft: #3a1a16;
+    --cyan: #57c4cb;
+    --cyan-soft: #123033;
+    --code-bg: #241f2b;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--page); color: var(--text-1);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    font-size: 16px; line-height: 1.6;
+  }
+  ::selection { background: var(--accent-soft); }
+
+  .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  a { color: var(--accent); }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------------- masthead ---------------- */
+  .masthead {
+    border-bottom: 1px solid var(--border);
+    background:
+      linear-gradient(180deg, var(--surface) 0%, var(--page) 100%);
+    padding: 44px 0 32px;
+  }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--long);
+    box-shadow: 0 0 0 3px var(--long-soft);
+  }
+  .masthead h1 {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: clamp(28px, 4.4vw, 42px); line-height: 1.08; font-weight: 700;
+    margin: 0 0 14px; letter-spacing: -0.01em; text-wrap: balance;
+  }
+  .masthead .lede {
+    font-size: 17px; color: var(--text-2); max-width: 620px; margin: 0 0 26px;
+  }
+  .masthead-row { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
+  .motif { flex: 0 0 auto; }
+  .meta-strip {
+    display: flex; gap: 22px; flex-wrap: wrap; font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px; color: var(--text-2);
+  }
+  .meta-strip b { color: var(--text-1); font-weight: 600; }
+  .nav-links {
+    display: flex; gap: 22px; flex-wrap: wrap; margin-top: 22px;
+    padding-top: 18px; border-top: 1px solid var(--border);
+  }
+  .nav-links a {
+    font-family: "IBM Plex Mono", monospace; font-size: 12.5px; font-weight: 500;
+    text-decoration: none; color: var(--text-1);
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ---------------- sections ---------------- */
+  section { padding: 54px 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  .section-head { margin-bottom: 8px; }
+  .section-num {
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--muted);
+    letter-spacing: .1em; text-transform: uppercase;
+  }
+  h2 {
+    font-family: "IBM Plex Mono", monospace; font-size: 22px; font-weight: 700;
+    margin: 4px 0 10px; text-wrap: balance;
+  }
+  .section-dek { color: var(--text-2); max-width: 640px; margin: 0 0 30px; }
+
+  figure { margin: 0; }
+  figure.diagram {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 20px 16px; box-shadow: var(--shadow); overflow-x: auto;
+  }
+  figure.diagram svg { display: block; width: 100%; height: auto; max-width: 100%; }
+  figcaption {
+    font-size: 13px; color: var(--muted); margin-top: 12px; padding: 0 2px;
+  }
+
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin: 14px 2px 0; font-size: 12.5px; color: var(--text-2); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+
+  /* ---------------- param spec sheet ---------------- */
+  .spec-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1px; background: var(--border); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+  }
+  .spec-cell { background: var(--surface); padding: 16px 18px; }
+  .spec-cell:last-child { grid-column: 1 / -1; }
+  .spec-cell .k {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+  }
+  .spec-cell .v {
+    font-family: "IBM Plex Mono", monospace; font-size: 17px; font-weight: 600; color: var(--text-1);
+    font-variant-numeric: tabular-nums;
+  }
+  .spec-cell .sub { font-size: 12.5px; color: var(--text-2); margin-top: 4px; }
+
+  /* ---------------- mode cards (trigger/fill) ---------------- */
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .mode-grid { grid-template-columns: 1fr; } }
+  .mode-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .mode-card .tag {
+    display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11px;
+    font-weight: 600; letter-spacing: .05em; padding: 3px 8px; border-radius: 5px;
+    background: var(--accent-soft); color: var(--accent); margin-bottom: 10px;
+  }
+  .mode-card h3 { font-size: 15.5px; margin: 0 0 6px; font-family: "IBM Plex Mono", monospace; }
+  .mode-card p { font-size: 13.5px; color: var(--text-2); margin: 0; }
+
+  /* ---------------- pipeline role list ---------------- */
+  .role-list { display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--border); }
+  .role {
+    display: grid; grid-template-columns: 160px 1fr; gap: 18px; padding: 14px 2px;
+    border-bottom: 1px solid var(--border);
+  }
+  @media (max-width: 600px) { .role { grid-template-columns: 1fr; gap: 4px; } }
+  .role .name { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 13.5px; padding-top: 1px; }
+  .role .name .chip {
+    display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px;
+    margin-left: 6px; vertical-align: middle; font-family: "IBM Plex Mono", monospace;
+  }
+  .chip.parallel { background: var(--cyan-soft); color: var(--cyan); }
+  .chip.serial { background: var(--short-soft); color: var(--short); }
+  .role .desc { font-size: 13.5px; color: var(--text-2); }
+
+  /* ---------------- fix callout ---------------- */
+  .fixes { display: flex; flex-direction: column; gap: 12px; }
+  .fix {
+    display: grid; grid-template-columns: 26px 1fr; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--long);
+    border-radius: 0 10px 10px 0; padding: 14px 16px;
+  }
+  .fix .n { font-family: "IBM Plex Mono", monospace; color: var(--long); font-weight: 700; font-size: 13px; }
+  .fix h4 { margin: 0 0 4px; font-size: 14.5px; }
+  .fix p { margin: 0; font-size: 13.5px; color: var(--text-2); }
+  .fix code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+
+  footer { padding: 32px 0 60px; }
+  footer p { font-size: 12.5px; color: var(--muted); margin: 0; }
+
+  code { font-family: "IBM Plex Mono", monospace; }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="wrap">
+    <p class="eyebrow"><span class="dot"></span>NSE intraday &middot; paper mode</p>
+    <h1>Rushil Agent Bot</h1>
+    <p class="lede">A seven-agent pipeline running an inside-bar breakout strategy across 11 NSE
+      stocks, long and short as independent instances, with configurable trigger and fill-timing
+      mechanics for A/B testing.</p>
+    <div class="masthead-row">
+      <svg class="motif" width="132" height="72" viewBox="0 0 132 72" role="img" aria-label="Stylized candlestick bars connected by a pipeline, representing market data flowing through the agent chain">
+        <line x1="10" y1="52" x2="122" y2="30" stroke="var(--cyan)" stroke-width="1.4" stroke-dasharray="2 4" opacity="0.55"/>
+        <g stroke="var(--text-2)" stroke-width="1.6">
+          <line x1="18" y1="12" x2="18" y2="60"/>
+          <line x1="38" y1="8"  x2="38" y2="52"/>
+          <line x1="58" y1="20" x2="58" y2="64"/>
+          <line x1="78" y1="6"  x2="78" y2="46"/>
+          <line x1="98" y1="16" x2="98" y2="58"/>
+          <line x1="118" y1="4" x2="118" y2="40"/>
+        </g>
+        <g>
+          <rect x="14" y="24" width="8" height="18" rx="1.5" fill="var(--short)"/>
+          <rect x="34" y="18" width="8" height="14" rx="1.5" fill="var(--long)"/>
+          <rect x="54" y="32" width="8" height="20" rx="1.5" fill="var(--short)"/>
+          <rect x="74" y="14" width="8" height="16" rx="1.5" fill="var(--long)"/>
+          <rect x="94" y="28" width="8" height="18" rx="1.5" fill="var(--short)"/>
+          <rect x="114" y="10" width="8" height="14" rx="1.5" fill="var(--accent)"/>
+        </g>
+      </svg>
+      <div class="meta-strip">
+        <span><b>11</b> symbols</span>
+        <span><b>2</b> directions</span>
+        <span><b>2×2</b> trigger/fill modes</span>
+        <span><b>2022–2026</b> backtest span</span>
+      </div>
+    </div>
+    <nav class="nav-links">
+      <a href="runs.html">granularity backtests (15m/10m/5m, full history) &rarr;</a>
+      <a href="sweep.html">trigger &amp; fill-timing sweep (12 combos) &rarr;</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section id="pipeline">
+    <div class="section-head">
+      <p class="section-num">01 &middot; Architecture</p>
+      <h2>The agent pipeline</h2>
+    </div>
+    <p class="section-dek">Every symbol is analyzed by the same five-agent chain each tick. Most
+      of the system runs concurrently; exactly one step is serialized on purpose.</p>
+
+    <figure class="diagram">
+      <svg viewBox="0 0 920 300" role="img" aria-label="Diagram of the agent pipeline: per-symbol analysis (Data, Indicator, Signal agents) runs in parallel across a thread pool, feeds into the Risk agent's single serialized capital reservation, then the Execution Dispatcher, with Portfolio Monitor and Journal agent as always-on side channels">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+        <style>
+          text { font-family: 'IBM Plex Mono', monospace; fill: currentColor; }
+          .lbl { font-size: 12px; }
+          .sub { font-size: 10px; opacity: .68; }
+          .edge { stroke: currentColor; stroke-width: 1.3; fill: none; marker-end: url(#arrow); opacity: .75; }
+          .box { fill: var(--surface-2); stroke: currentColor; stroke-width: 1.2; opacity: .95; }
+        </style>
+
+        <!-- parallel bracket -->
+        <rect x="30" y="34" width="560" height="120" rx="10" fill="none" stroke="var(--cyan)" stroke-width="1.4" stroke-dasharray="4 4"/>
+        <text x="42" y="26" class="lbl" fill="var(--cyan)">PER-SYMBOL ANALYSIS &mdash; thread pool, N=8, one worker crash never blocks another</text>
+
+        <!-- Orchestrator -->
+        <rect class="box" x="350" y="248" width="220" height="36" rx="8"/>
+        <text x="460" y="270" class="lbl" text-anchor="middle">Orchestrator</text>
+
+        <!-- three analysis boxes -->
+        <rect class="box" x="55" y="70" width="150" height="52" rx="8"/>
+        <text x="130" y="92" class="lbl" text-anchor="middle">Data agent</text>
+        <text x="130" y="108" class="sub" text-anchor="middle">cache-first candles</text>
+
+        <rect class="box" x="245" y="70" width="150" height="52" rx="8"/>
+        <text x="320" y="92" class="lbl" text-anchor="middle">Indicator agent</text>
+        <text x="320" y="108" class="sub" text-anchor="middle">inside-bar snapshot</text>
+
+        <rect class="box" x="435" y="70" width="150" height="52" rx="8"/>
+        <text x="510" y="92" class="lbl" text-anchor="middle">Signal agent</text>
+        <text x="510" y="108" class="sub" text-anchor="middle">LONG + SHORT instances</text>
+
+        <path class="edge" d="M205,96 H245"/>
+        <path class="edge" d="M395,96 H435"/>
+
+        <!-- Risk agent (serialized) -->
+        <rect x="650" y="60" width="170" height="72" rx="8" fill="var(--short-soft)" stroke="var(--short)" stroke-width="1.4"/>
+        <text x="735" y="84" class="lbl" text-anchor="middle" fill="var(--short)">Risk agent</text>
+        <text x="735" y="100" class="sub" text-anchor="middle" fill="var(--short)">try_reserve() &mdash;</text>
+        <text x="735" y="113" class="sub" text-anchor="middle" fill="var(--short)">only serialized step</text>
+        <path class="edge" d="M585,96 H650"/>
+
+        <!-- Dispatcher -->
+        <rect class="box" x="650" y="170" width="170" height="52" rx="8"/>
+        <text x="735" y="192" class="lbl" text-anchor="middle">Exec Dispatcher</text>
+        <text x="735" y="208" class="sub" text-anchor="middle">exits outrank entries</text>
+        <path class="edge" d="M735,132 V170"/>
+
+        <!-- side channels -->
+        <rect class="box" x="55" y="170" width="170" height="52" rx="8" opacity="0.85"/>
+        <text x="140" y="192" class="lbl" text-anchor="middle">Portfolio monitor</text>
+        <text x="140" y="208" class="sub" text-anchor="middle">every open position, at once</text>
+
+        <rect class="box" x="245" y="170" width="170" height="52" rx="8" opacity="0.85"/>
+        <text x="330" y="192" class="lbl" text-anchor="middle">Journal agent</text>
+        <text x="330" y="208" class="sub" text-anchor="middle">append-only, thread-safe</text>
+
+        <!-- orchestrator connections -->
+        <path class="edge" d="M420,248 C420,235 300,222 140,222" opacity="0.4"/>
+        <path class="edge" d="M420,248 C420,235 350,222 330,222" opacity="0.4"/>
+        <path class="edge" d="M470,248 V222" opacity="0.4"/>
+        <path class="edge" d="M500,248 C520,235 700,222 735,222" opacity="0.4"/>
+      </svg>
+    </figure>
+    <div class="legend">
+      <span><i style="background:var(--cyan)"></i>parallel (thread pool)</span>
+      <span><i style="background:var(--short)"></i>serialized (one lock, no I/O under it)</span>
+      <span><i style="background:var(--text-2); opacity:.5"></i>orchestrator wiring</span>
+    </div>
+    <figcaption>Data&rarr;Indicator&rarr;Signal runs concurrently per symbol. Everything funnels
+      through one short, I/O-free lock in the Risk agent&mdash;the single point that stops two
+      simultaneous signals from double-spending the same account capital&mdash;before reaching
+      the dispatcher, which always lets exits jump the queue ahead of new entries.</figcaption>
+
+    <div class="role-list" style="margin-top:34px;">
+      <div class="role">
+        <div class="name">DataAgent</div>
+        <div class="desc">Owns the broker feed only. Cache-first from <code>data_cache/*.csv</code>; falls back to a live Upstox pull. No indicators, no decisions.</div>
+      </div>
+      <div class="role">
+        <div class="name">IndicatorAgent</div>
+        <div class="desc">Turns the last 2 candles into a snapshot (inside-bar flag + OHLC). Never says BUY/SELL.</div>
+      </div>
+      <div class="role">
+        <div class="name">SignalAgent</div>
+        <div class="desc">The only place that knows the entry rules. LONG and SHORT tracked as separate strategy instances, each keyed by <code>symbol+exchange+timeframe+strategy_id</code> so they never collide.</div>
+      </div>
+      <div class="role">
+        <div class="name">RiskAgent <span class="chip serial">serialized</span></div>
+        <div class="desc">Per-symbol checks, then the one account-wide atomic reservation step&mdash;no I/O held under the lock.</div>
+      </div>
+      <div class="role">
+        <div class="name">ExecutionDispatcher <span class="chip parallel">parallel</span></div>
+        <div class="desc">Priority queue, N workers, idempotent on <code>client_order_id</code>. Exits always outrank pending entries.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="logic">
+    <div class="section-head">
+      <p class="section-num">02 &middot; Strategy</p>
+      <h2>Trading logic</h2>
+    </div>
+    <p class="section-dek">One setup, two independent directions, two configurable switches for
+      how a breakout is confirmed and when it's assumed fillable.</p>
+
+    <figure class="diagram">
+      <svg viewBox="0 0 940 400" role="img" aria-label="Flow diagram: an inside-bar setup forms, then either the close-trigger or intrabar-trigger mode confirms a breakout, the 0.75 percent risk filter can veto it, then either same-candle or next-open fill timing opens the position, which exits by priority: forced square-off, then stop-loss, then target, then time-exit">
+        <defs>
+          <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+        <style>
+          text { font-family: 'IBM Plex Mono', monospace; fill: currentColor; }
+          .lbl2 { font-size: 12px; }
+          .sub2 { font-size: 10px; opacity: .68; }
+          .edge2 { stroke: currentColor; stroke-width: 1.3; fill: none; marker-end: url(#arrow2); opacity: .8; }
+          .box2 { fill: var(--surface-2); stroke: currentColor; stroke-width: 1.2; }
+        </style>
+
+        <!-- Setup -->
+        <rect class="box2" x="20" y="164" width="130" height="52" rx="8"/>
+        <text x="85" y="186" class="lbl2" text-anchor="middle">Inside bar</text>
+        <text x="85" y="202" class="sub2" text-anchor="middle">forms / shifts</text>
+
+        <!-- branch to trigger modes -->
+        <path class="edge2" d="M150,190 H185"/>
+
+        <rect x="185" y="120" width="150" height="46" rx="8" fill="var(--cyan-soft)" stroke="var(--cyan)" stroke-width="1.3"/>
+        <text x="260" y="142" class="lbl2" text-anchor="middle" fill="var(--cyan)">close trigger</text>
+        <text x="260" y="157" class="sub2" text-anchor="middle" fill="var(--cyan)">confirmed on candle close</text>
+
+        <rect x="185" y="212" width="150" height="46" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+        <text x="260" y="234" class="lbl2" text-anchor="middle" fill="var(--accent)">intrabar trigger</text>
+        <text x="260" y="249" class="sub2" text-anchor="middle" fill="var(--accent)">confirmed on High/Low cross</text>
+
+        <path class="edge2" d="M150,180 C165,160 165,143 185,143"/>
+        <path class="edge2" d="M150,200 C165,220 165,235 185,235"/>
+
+        <path class="edge2" d="M335,143 C365,143 365,190 385,190"/>
+        <path class="edge2" d="M335,235 C365,235 365,190 385,190"/>
+
+        <!-- Risk filter -->
+        <rect class="box2" x="385" y="164" width="140" height="52" rx="8"/>
+        <text x="455" y="186" class="lbl2" text-anchor="middle">Risk filter</text>
+        <text x="455" y="202" class="sub2" text-anchor="middle">stop &gt; 0.75%? veto</text>
+
+        <path class="edge2" d="M525,190 H555"/>
+
+        <!-- branch to fill modes -->
+        <rect x="555" y="120" width="150" height="46" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+        <text x="630" y="142" class="lbl2" text-anchor="middle" fill="var(--accent)">same-candle fill</text>
+        <text x="630" y="157" class="sub2" text-anchor="middle" fill="var(--accent)">buffer off trigger level</text>
+
+        <rect x="555" y="212" width="150" height="46" rx="8" fill="var(--cyan-soft)" stroke="var(--cyan)" stroke-width="1.3"/>
+        <text x="630" y="234" class="lbl2" text-anchor="middle" fill="var(--cyan)">next-open fill</text>
+        <text x="630" y="249" class="sub2" text-anchor="middle" fill="var(--cyan)">re-derives stop/target</text>
+
+        <path class="edge2" d="M525,180 C540,160 540,143 555,143"/>
+        <path class="edge2" d="M525,200 C540,220 540,235 555,235"/>
+
+        <path class="edge2" d="M705,143 C735,143 735,190 755,190"/>
+        <path class="edge2" d="M705,235 C735,235 735,190 755,190"/>
+
+        <!-- Position open -->
+        <rect x="755" y="164" width="165" height="52" rx="8" fill="var(--long-soft)" stroke="var(--long)" stroke-width="1.4"/>
+        <text x="837" y="186" class="lbl2" text-anchor="middle" fill="var(--long)">Position open</text>
+        <text x="837" y="202" class="sub2" text-anchor="middle" fill="var(--long)">SL / target / hold-bars set</text>
+
+        <!-- exit priority row: trunk, then a straight fan to each box in
+             1st..last reading order so the row reads left-to-right as a
+             checklist, matching each box's own rank label -->
+        <path class="edge2" d="M837,216 V252" marker-end="none"/>
+        <text x="815" y="240" class="sub2" text-anchor="end">exit priority</text>
+
+        <path class="edge2" d="M837,252 L215,288"/>
+        <path class="edge2" d="M837,252 L385,288"/>
+        <path class="edge2" d="M837,252 L555,288"/>
+        <path class="edge2" d="M837,252 L725,288"/>
+
+        <rect x="140" y="290" width="150" height="44" rx="8" fill="var(--short-soft)" stroke="var(--short)" stroke-width="1.4"/>
+        <text x="215" y="317" class="lbl2" text-anchor="middle" fill="var(--short)">square-off</text>
+        <text x="215" y="358" class="sub2" text-anchor="middle">1st &middot; 15:14 IST, no exceptions</text>
+
+        <rect class="box2" x="310" y="290" width="150" height="44" rx="8" opacity="0.92"/>
+        <text x="385" y="317" class="lbl2" text-anchor="middle">stop-loss</text>
+        <text x="385" y="358" class="sub2" text-anchor="middle">2nd</text>
+
+        <rect class="box2" x="480" y="290" width="150" height="44" rx="8" opacity="0.92"/>
+        <text x="555" y="317" class="lbl2" text-anchor="middle">target (3R)</text>
+        <text x="555" y="358" class="sub2" text-anchor="middle">3rd</text>
+
+        <rect class="box2" x="650" y="290" width="150" height="44" rx="8" opacity="0.92"/>
+        <text x="725" y="317" class="lbl2" text-anchor="middle">time-exit</text>
+        <text x="725" y="358" class="sub2" text-anchor="middle">last &middot; ~120 min hold</text>
+      </svg>
+    </figure>
+    <div class="legend">
+      <span><i style="background:var(--cyan)"></i>close / next-open (original, no look-ahead)</span>
+      <span><i style="background:var(--accent)"></i>intrabar / same-candle (added this session)</span>
+    </div>
+    <figcaption>Two independent switches sit in series: how a breakout is confirmed (trigger),
+      and when the fill is assumed achievable (timing). All four combinations share the same
+      setup detection, risk filter, and exit-priority chain downstream.</figcaption>
+
+    <h2 style="margin-top:48px; font-size:18px;">Trigger &amp; fill modes</h2>
+    <div class="mode-grid" style="margin-top:16px;">
+      <div class="mode-card">
+        <span class="tag">TRIGGER = CLOSE</span>
+        <h3>Confirmed on close</h3>
+        <p>A bar's close crossing the range confirms the breakout. No look-ahead: the close is
+          only known once the bar has finished.</p>
+      </div>
+      <div class="mode-card">
+        <span class="tag">TRIGGER = INTRABAR</span>
+        <h3>Confirmed on cross</h3>
+        <p>The range is broken the moment price trades past it (High/Low), like a resting
+          breakout order. Entry buffer: min(0.03% of price, &#8377;2), gap-aware via the bar's open.</p>
+      </div>
+      <div class="mode-card">
+        <span class="tag">FILL = NEXT_OPEN</span>
+        <h3>Filled next bar</h3>
+        <p>Decided on candle N, filled at N+1's open. Stop stays fixed to its structural basis;
+          distance/target and the 0.75% filter are re-derived from the real fill price.</p>
+      </div>
+      <div class="mode-card">
+        <span class="tag">FILL = SAME_CANDLE</span>
+        <h3>Filled immediately</h3>
+        <p>Fills within the triggering bar itself, at the buffer-adjusted price. Runs through the
+          identical risk re-check as next-open&mdash;only the queue-and-wait step is skipped.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="params">
+    <div class="section-head">
+      <p class="section-num">03 &middot; Parameters</p>
+      <h2>Spec sheet</h2>
+    </div>
+    <p class="section-dek">Price-based rules hold across every candle granularity; only the
+      time-based exit is rescaled to preserve the ~120-minute hold intent.</p>
+
+    <div class="spec-grid">
+      <div class="spec-cell"><div class="k">Stop buffer</div><div class="v">&#8377;2.00</div><div class="sub">fixed, never trailed</div></div>
+      <div class="spec-cell"><div class="k">Risk:reward</div><div class="v">1 : 3</div><div class="sub">target = entry &plusmn; 3&times; stop distance</div></div>
+      <div class="spec-cell"><div class="k">Risk cap</div><div class="v">0.75%</div><div class="sub">skip if stop &gt; 0.75% of entry price</div></div>
+      <div class="spec-cell"><div class="k">Hold intent</div><div class="v">~120 min</div><div class="sub">rescaled per candle interval</div></div>
+      <div class="spec-cell"><div class="k">Entry window</div><div class="v">09:30&ndash;14:00</div><div class="sub">IST</div></div>
+      <div class="spec-cell"><div class="k">Square-off</div><div class="v">15:14</div><div class="sub">hard cutoff, IST, no exceptions</div></div>
+      <div class="spec-cell"><div class="k">Universe</div><div class="v">11 stocks</div><div class="sub">8 sector buckets</div></div>
+      <div class="spec-cell"><div class="k">Position size</div><div class="v">1 share</div><div class="sub">testing only &mdash; capital-based sizing planned</div></div>
+      <div class="spec-cell"><div class="k">Concurrency cap</div><div class="v">3 / 6</div><div class="sub">max positions / entries per day, account-wide</div></div>
+    </div>
+  </section>
+
+  <section id="fixes">
+    <div class="section-head">
+      <p class="section-num">04 &middot; This session</p>
+      <h2>Bugs fixed</h2>
+    </div>
+    <p class="section-dek">Both verified against the full 52-test suite before and after.</p>
+    <div class="fixes">
+      <div class="fix">
+        <div class="n">01</div>
+        <div>
+          <h4>Cross-day inside-bar detection</h4>
+          <p>The indicator agent compared the last two candles with no same-day guard&mdash;the
+            first candle of a new session could be flagged "inside" yesterday's last candle.
+            Fixed in <code>indicator_agent.py</code> with an explicit same-day check.</p>
+        </div>
+      </div>
+      <div class="fix">
+        <div class="n">02</div>
+        <div>
+          <h4>Stale setups surviving overnight</h4>
+          <p>A pending range wasn't cleared at day boundaries, so a setup from yesterday's close
+            could still trigger against today's open. Fixed in <code>signal_agent.py</code> by
+            resetting pending state per key at the first snapshot of each new day.</p>
+        </div>
+      </div>
+      <div class="fix">
+        <div class="n">03</div>
+        <div>
+          <h4>O(n&sup2;) memory blowup in <code>replay()</code></h4>
+          <p>Each tick copied the <em>entire</em> candle history seen so far, though only the last
+            2 candles are ever read downstream&mdash;OOM'd the multi-year 5-min backtest. Fixed by
+            bounding the slice to a 2-candle window.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>Rushil Agent Bot &middot; paper mode only &middot; generated overview, 2026-09-21</p>
+  </div>
+</footer>
+
+</body>
+</html>

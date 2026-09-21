@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en" data-theme="">
+<head>
+<meta charset="utf-8">
+<title>Rushil Agent Bot — Intrabar Sweep</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7; --text-1: #0b0b0b; --text-2: #52514e;
+    --muted: #898781; --border: rgba(11,11,11,0.10); --series-1: #2a78d6;
+    --good-text: #006300; --critical: #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d; --text-1: #ffffff; --text-2: #c3c2b7;
+      --muted: #898781; --border: rgba(255,255,255,0.10); --series-1: #3987e5;
+      --good-text: #0ca30c; --critical: #e66767;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d; --text-1: #ffffff; --text-2: #c3c2b7;
+    --muted: #898781; --border: rgba(255,255,255,0.10); --series-1: #3987e5;
+    --good-text: #0ca30c; --critical: #e66767;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px 60px; background: var(--page); color: var(--text-1);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
+  h2 { font-size: 15px; font-weight: 700; margin: 32px 0 12px; color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; }
+  .subtitle { color: var(--text-2); font-size: 14px; margin-bottom: 8px; }
+  .backlink { font-size: 13px; margin-bottom: 20px; display: inline-block; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  a.card {
+    display: block; background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; text-decoration: none; color: var(--text-1);
+    transition: border-color .15s;
+  }
+  a.card:hover { border-color: var(--series-1); }
+  .card-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+  .card-stats { display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; }
+  .card-stats b { font-variant-numeric: tabular-nums; }
+  .pos { color: var(--good-text); }
+  .neg { color: var(--critical); }
+  .note { font-size: 12px; color: var(--muted); margin-top: 32px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="backlink" href="runs.html">&larr; back to granularity runs</a>
+  <h1>Intrabar Trigger / Fill-Timing Sweep</h1>
+  <div class="subtitle">
+    Same strategy, TRIGGER_MODE="intrabar" (breakout confirmed the instant price trades past
+    the range, not on candle close) - long and short run as fully separate backtests, never
+    simultaneously. Full 2022-01-03 to 2026-09-18 history, all 11 symbols, each combo one
+    sequential run.
+  </div>
+
+  <h2>Long, same-candle fill</h2>
+  <div class="grid">
+    <a class="card" href="dashboard_5m_long_intrabar_same_candle.html">
+      <div class="card-title">5-Minute</div>
+      <div class="card-stats">
+        <span>Net: <b class="neg">−₹606.12</b></span>
+        <span>Win rate: <b>33%</b></span>
+        <span>Trades: <b>447</b> · Signals: <b>113,309</b></span>
+      </div>
+    </a>
+    <a class="card" href="dashboard_10m_long_intrabar_same_candle.html">
+      <div class="card-title">10-Minute</div>
+      <div class="card-stats">
+        <span>Net: <b class="pos">+₹91.24</b></span>
+        <span>Win rate: <b>35%</b></span>
+        <span>Trades: <b>191</b> · Signals: <b>52,370</b></span>
+      </div>
+    </a>
+    <a class="card" href="dashboard_15m_long_intrabar_same_candle.html">
+      <div class="card-title">15-Minute</div>
+      <div class="card-stats">
+        <span>Net: <b class="pos">+₹315.61</b></span>
+        <span>Win rate: <b>33%</b></span>
+        <span>Trades: <b>111</b> · Signals: <b>31,921</b></span>
+      </div>
+    </a>
+  </div>
+
+  <h2>Long, next-open fill</h2>
+  <div class="grid">
+    <a class="card" href="dashboard_5m_long_intrabar.html">
+      <div class="card-title">5-Minute</div>
+      <div class="card-stats">
+        <span>Net: <b class="pos">+₹4,156.40</b></span>
+        <span>Win rate: <b>33%</b></span>
+        <span>Trades: <b>410</b> · Signals: <b>113,348</b></span>
+      </div>
+    </a>
+    <a class="card" href="dashboard_10m_long_intrabar.html">
+      <div class="card-title">10-Minute</div>
+      <div class="card-stats">
+        <span>Net: <b class="pos">+₹730.68</b></span>
+        <span>Win rate: <b>30%</b></span>
+        <span>Trades: <b>160</b> · Signals: <b>52,382</b></span>
+      </div>
+    </a>
+    <a class="card" href="dashboard_15m_long_intrabar.html">
+      <div class="card-title">15-Minute</div>
+      <div class="card-stats">
+        <span>Net: <b class="neg">−₹292.27</b></span>
+        <span>Win rate: <b>31%</b></span>
+        <span>Trades: <b>107</b> · Signals: <b>31,910</b></span>
+      </div>
+    </a>
+  </div>
+
+  <h2>Short, same-candle fill</h2>
+  <div class="grid">
+    <a class="card" href="dashboard_5m_short_intrabar_same_candle.html">
+      <div class="card-title">5-Minute</div>
+      <div class="card-stats">
+        <span>Net: <b class="neg">−₹1,133.39</b></span>
+        <span>Win rate: <b>33%</b></span>
+        <span>Trades: <b>428</b> · Signals: <b>116,173</b></span>
+      </div>
+    </a>
+    <a class="card" href="dashboard_10m_short_intrabar_same_candle.html">
+      <div class="card-title">10-Minute</div>
+      <div class="card-stats">
+        <span>Net: <b class="neg">−₹509.80</b></span>
+        <span>Win rate: <b>35%</b></span>
+        <span>Trades: <b>184</b> · Signals: <b>53,744</b></span>
+      </div>
+    </a>
+    <a class="card" href="dashboard_15m_short_intrabar_same_candle.html">
+      <div class="card-title">15-Minute</div>
+      <div class="card-stats">
+        <span>Net: <b class="neg">−₹1,461.42</b></span>
+        <span>Win rate: <b>40%</b></span>
+        <span>Trades: <b>120</b> · Signals: <b>32,610</b></span>
+      </div>
+    </a>
+  </div>
+
+  <h2>Short, next-open fill</h2>
+  <div class="grid">
+    <a class="card" href="dashboard_5m_short_intrabar.html">
+      <div class="card-title">5-Minute</div>
+      <div class="card-stats">
+        <span>Net: <b class="neg">−₹2,392.11</b></span>
+        <span>Win rate: <b>34%</b></span>
+        <span>Trades: <b>390</b> · Signals: <b>116,262</b></span>
+      </div>
+    </a>
+    <a class="card" href="dashboard_10m_short_intrabar.html">
+      <div class="card-title">10-Minute</div>
+      <div class="card-stats">
+        <span>Net: <b class="neg">−₹430.14</b></span>
+        <span>Win rate: <b>34%</b></span>
+        <span>Trades: <b>176</b> · Signals: <b>53,764</b></span>
+      </div>
+    </a>
+    <a class="card" href="dashboard_15m_short_intrabar.html">
+      <div class="card-title">15-Minute</div>
+      <div class="card-stats">
+        <span>Net: <b class="neg">−₹46.17</b></span>
+        <span>Win rate: <b>39%</b></span>
+        <span>Trades: <b>110</b> · Signals: <b>32,599</b></span>
+      </div>
+    </a>
+  </div>
+
+  <p class="note">
+    <strong>Bugs fixed before this sweep ran:</strong> (1) inside-bar detection was comparing
+    the previous trading day's last candle against today's first candle with no same-day
+    guard - fixed in <code>indicator_agent.py</code>. (2) a pending setup could silently
+    survive across a day boundary and trigger against a stale prior-day range - fixed in
+    <code>signal_agent.py</code>. Both verified against the full 52-test suite before this
+    sweep, and again produce identical pass counts after.
+  </p>
+  <p class="note">
+    Position sizing is still the fixed 1-share placeholder throughout (real capital-based
+    sizing - qty scaled to a margin/capital target, as in the long-only reference script this
+    sweep was designed to A/B against - is a follow-up, not run here). Every combo above used
+    <code>trigger=intrabar</code>; the earlier granularity comparison on <a href="runs.html">the
+    main runs page</a> used the original <code>trigger=close</code> behavior, so the two pages
+    aren't directly comparable trade-for-trade - they're answering different questions (candle
+    size vs. trigger/fill mechanics).
+  </p>
+</div>
+</body>
+</html>

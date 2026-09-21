@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en" data-theme="">
+<head>
+<meta charset="utf-8">
+<title>Rushil Agent Bot — Runs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7; --text-1: #0b0b0b; --text-2: #52514e;
+    --muted: #898781; --border: rgba(11,11,11,0.10); --series-1: #2a78d6;
+    --good-text: #006300; --critical: #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d; --text-1: #ffffff; --text-2: #c3c2b7;
+      --muted: #898781; --border: rgba(255,255,255,0.10); --series-1: #3987e5;
+      --good-text: #0ca30c; --critical: #e66767;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d; --text-1: #ffffff; --text-2: #c3c2b7;
+    --muted: #898781; --border: rgba(255,255,255,0.10); --series-1: #3987e5;
+    --good-text: #0ca30c; --critical: #e66767;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px 60px; background: var(--page); color: var(--text-1);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
+  .subtitle { color: var(--text-2); font-size: 14px; margin-bottom: 28px; }
+  .cards { display: flex; flex-direction: column; gap: 12px; }
+  a.card {
+    display: block; background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 20px; text-decoration: none; color: var(--text-1);
+    transition: border-color .15s;
+  }
+  a.card:hover { border-color: var(--series-1); }
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .card-sub { font-size: 13px; color: var(--text-2); margin-bottom: 10px; }
+  .card-stats { display: flex; gap: 18px; font-size: 13px; }
+  .card-stats b { font-variant-numeric: tabular-nums; }
+  .pos { color: var(--good-text); }
+  .neg { color: var(--critical); }
+  .note { font-size: 12px; color: var(--muted); margin-top: 28px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="index.html" style="font-size:13px;display:inline-block;margin-bottom:6px;">system overview: agent pipeline &amp; trading logic diagrams &rarr;</a><br>
+  <a href="sweep.html" style="font-size:13px;display:inline-block;margin-bottom:14px;">intrabar trigger / fill-timing sweep (long vs short, same-candle vs next-open) &rarr;</a>
+  <h1>Rushil Agent Bot — Replay Runs</h1>
+  <div class="subtitle">Same inside-bar breakout strategy (long + short), same 11-symbol universe. All three candle granularities below now run the full 4.7-year history.</div>
+
+  <div class="cards">
+    <a class="card" href="dashboard_full_15m.html">
+      <div class="card-title">15-Minute Candles — 4.7 Years, All Stocks</div>
+      <div class="card-sub">2022-01-03 to 2026-09-16 · real Upstox data · per-stock trade breakdown below</div>
+      <div class="card-stats">
+        <span>Net P&amp;L: <b class="neg">−₹825.95</b></span>
+        <span>Win rate: <b>36%</b></span>
+        <span>Trades: <b>551</b></span>
+        <span>Signals: <b>40,674</b></span>
+      </div>
+    </a>
+
+    <a class="card" href="dashboard_5m.html">
+      <div class="card-title">5-Minute Candles — 4.7 Years, All Stocks</div>
+      <div class="card-sub">2022-01-03 to 2026-09-18 · fastest granularity — most signals, most veto pressure</div>
+      <div class="card-stats">
+        <span>Net P&amp;L: <b class="neg">−₹897.60</b></span>
+        <span>Win rate: <b>36%</b></span>
+        <span>Trades: <b>409</b></span>
+        <span>Signals: <b>151,580</b></span>
+      </div>
+    </a>
+
+    <a class="card" href="dashboard_10m.html">
+      <div class="card-title">10-Minute Candles — 4.7 Years, All Stocks</div>
+      <div class="card-sub">2022-01-03 to 2026-09-18 · best net result of the three granularities</div>
+      <div class="card-stats">
+        <span>Net P&amp;L: <b class="pos">+₹1,736.39</b></span>
+        <span>Win rate: <b>36%</b></span>
+        <span>Trades: <b>219</b></span>
+        <span>Signals: <b>68,396</b></span>
+      </div>
+    </a>
+
+    <a class="card" href="dashboard.html">
+      <div class="card-title">15-Minute Candles (original)</div>
+      <div class="card-sub">Rushil's originally documented timeframe, kept for comparison</div>
+      <div class="card-stats">
+        <span>Net P&amp;L: <b class="neg">−₹2.83</b></span>
+        <span>Trades: <b>5</b></span>
+        <span>Signals: <b>200</b></span>
+      </div>
+    </a>
+  </div>
+
+  <p class="note">
+    All runs use identical rules (0.75% stop-risk filter, 3R target, 1 concurrent position
+    / 3 entries per day per direction per symbol, max 3 account-wide concurrent positions).
+    Trades are approved purely on the strategy's own entry/exit logic — there is no
+    cost-vs-edge filter gating whether a setup is "worth" the estimated transaction
+    charges. Each dashboard still reports gross P&amp;L, total charges, and net P&amp;L per
+    trade for visibility, but charges never block a trade from happening. Paper mode
+    only — no real orders were placed, 1-share fixed sizing throughout.
+  </p>
+  <p class="note">
+    <strong>The 4.7-year run exposed and fixed a real concurrency bug</strong> before these
+    numbers can be trusted: two async callbacks (order-fill confirmation and position-close)
+    had no ordering guarantee relative to each other, which could leave a "ghost" position
+    permanently occupying one of only 3 account-wide trade slots when an entry and exit
+    landed on the same candle. The first attempt at this backtest traded normally for 2.5
+    weeks, then silently stopped trading entirely for the remaining 4.6 years while
+    reporting itself as blocked by its own position limits. Fixed in <code>portfolio_state.py</code>
+    with a regression test that reproduces the exact failure. The numbers shown here are
+    from the corrected re-run.
+  </p>
+  <p class="note">
+    <strong>The 5m/10m full-history runs exposed a second bug</strong>, this one in
+    <code>Orchestrator.replay()</code>: it built each tick's candle window as
+    <code>candles[:idx+1]</code> — a full copy of everything seen so far — instead of the
+    bounded 2-candle window <code>IndicatorAgent</code> actually reads. That's O(n²) memory,
+    and on 5-min candles (~9x the tick count of 15-min) it crashed with <code>MemoryError</code>
+    partway through; the 10-min run was heading the same way. Fixed by slicing
+    <code>candles[idx-1:idx+1]</code> instead, verified against the full 52-test suite, then
+    re-run. All three granularities above are now the full 2022-01-03 to 2026-09-18 range,
+    not a short comparison window.
+  </p>
+  <p class="note">
+    The time-based exit is rescaled per granularity to preserve Rushil's original
+    ~120-minute hold intent rather than silently becoming a shorter or longer hold. All three
+    converge to the same 36% win rate, which tracks — the entry/exit price rules are identical
+    across granularities, only how often a setup is detected changes. 10-min comes out net
+    positive across the full history; 5-min and 15-min are both net negative, with 5-min the
+    worst of the three (most veto pressure, most whipsaw-prone signals).
+  </p>
+</div>
+</body>
+</html>
