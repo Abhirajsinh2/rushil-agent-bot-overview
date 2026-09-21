@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en" data-theme="">
+<head>
+<meta charset="utf-8">
+<title>Rushil Agent Bot — Custom 10-Stock Universe</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --page: #f9f9f7; --text-1: #0b0b0b; --text-2: #52514e;
+    --muted: #898781; --border: rgba(11,11,11,0.10); --series-1: #2a78d6;
+    --good-text: #006300; --critical: #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --page: #0d0d0d; --text-1: #ffffff; --text-2: #c3c2b7;
+      --muted: #898781; --border: rgba(255,255,255,0.10); --series-1: #3987e5;
+      --good-text: #0ca30c; --critical: #e66767;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d; --text-1: #ffffff; --text-2: #c3c2b7;
+    --muted: #898781; --border: rgba(255,255,255,0.10); --series-1: #3987e5;
+    --good-text: #0ca30c; --critical: #e66767;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px 60px; background: var(--page); color: var(--text-1);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
+  .subtitle { color: var(--text-2); font-size: 14px; margin-bottom: 8px; }
+  .symbols {
+    display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 24px;
+  }
+  .symbols span {
+    font-family: ui-monospace, monospace; font-size: 12px; background: var(--surface-1);
+    border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; color: var(--text-2);
+  }
+  table {
+    width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 13.5px;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+  }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .pos { color: var(--good-text); font-weight: 600; }
+  .neg { color: var(--critical); font-weight: 600; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  a.card {
+    display: block; background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px; text-decoration: none; color: var(--text-1);
+    transition: border-color .15s;
+  }
+  a.card:hover { border-color: var(--series-1); }
+  .card-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+  .card-stats { display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 28px; line-height: 1.6; }
+  .callout {
+    background: var(--surface-1); border: 1px solid var(--border); border-left: 3px solid var(--critical);
+    border-radius: 0 10px 10px 0; padding: 14px 16px; margin-top: 24px; font-size: 13.5px; line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;margin-bottom:18px;">
+    <a href="index.html">Overview</a>
+    <a href="runs.html">Runs</a>
+    <a href="sweep.html">Sweep</a>
+    <a href="regime.html">Regime</a>
+    <span style="color:var(--muted);">Custom10</span>
+  </nav>
+  <h1>Custom 10-Stock Universe</h1>
+  <div class="subtitle">
+    Same inside-bar breakout strategy, same baseline config (both directions, close trigger,
+    next-open fill, no regime filter) - only the traded universe changed, swapping 7 of the
+    original 11 stocks for a different NSE basket. Full 2022-2026 history.
+  </div>
+  <div class="symbols">
+    <span>SUNPHARMA</span><span>HAL</span><span>MARUTI</span><span>MUTHOOTFIN</span>
+    <span>M&amp;M</span><span>ZYDUSLIFE</span><span>EICHERMOT</span><span>HINDALCO</span>
+    <span>GRASIM</span><span>CHOLAFIN</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Granularity</th><th class="num">Net P&amp;L (original 11-stock)</th><th class="num">Net P&amp;L (custom 10-stock)</th><th class="num">Win rate</th><th class="num">Trades</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>5-min</td>
+        <td class="num neg">−₹897.60</td>
+        <td class="num neg">−₹6,244.19</td>
+        <td class="num">30%</td>
+        <td class="num">1,483</td>
+      </tr>
+      <tr>
+        <td>10-min</td>
+        <td class="num pos">+₹1,736.39</td>
+        <td class="num neg">−₹1,533.31</td>
+        <td class="num">36%</td>
+        <td class="num">569</td>
+      </tr>
+      <tr>
+        <td>15-min</td>
+        <td class="num neg">−₹825.95</td>
+        <td class="num neg">−₹2,102.98</td>
+        <td class="num">31%</td>
+        <td class="num">206</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Result: worse across the board.</strong> The custom universe's only previously-positive
+    result (10-min, +₹1,736.39 on the original 11 stocks) flips negative. 5-min is dramatically
+    worse - trade count more than tripled (409 &rarr; 1,483) on almost the same signal volume,
+    meaning these stocks produce far more fillable breakouts, but the extra trades are net
+    losers. Position sizing is still the fixed 1-share placeholder throughout, so this comparison
+    carries the same limitation as every other run so far - a ~₹12,000/share stock like MARUTI
+    and a ~₹700/share stock like SUNPHARMA contribute very differently in raw-point terms.
+  </div>
+
+  <div class="grid">
+    <a class="card" href="dashboard_5m_custom10.html">
+      <div class="card-title">5-Minute Candles</div>
+      <div class="card-stats">
+        <span>Net: <b class="neg">−₹6,244.19</b></span>
+        <span>Win rate: <b>30%</b> · Trades: <b>1,483</b></span>
+        <span>Signals: <b>147,338</b></span>
+      </div>
+    </a>
+    <a class="card" href="dashboard_10m_custom10.html">
+      <div class="card-title">10-Minute Candles</div>
+      <div class="card-stats">
+        <span>Net: <b class="neg">−₹1,533.31</b></span>
+        <span>Win rate: <b>36%</b> · Trades: <b>569</b></span>
+        <span>Signals: <b>66,825</b></span>
+      </div>
+    </a>
+    <a class="card" href="dashboard_15m_custom10.html">
+      <div class="card-title">15-Minute Candles</div>
+      <div class="card-stats">
+        <span>Net: <b class="neg">−₹2,102.98</b></span>
+        <span>Win rate: <b>31%</b> · Trades: <b>206</b></span>
+        <span>Signals: <b>39,962</b></span>
+      </div>
+    </a>
+  </div>
+
+  <p class="note">
+    Instrument keys for the 6 new symbols (HAL, MARUTI, M&amp;M, ZYDUSLIFE, GRASIM, CHOLAFIN)
+    were sourced from this account's own <code>edge_1st/config.py</code> and
+    <code>best_strategy_2/fetch_data.py</code>, not guessed. Sector tags for the correlated-
+    exposure cap are reasonable manual assignments (HAL&rarr;defense, GRASIM&rarr;cement, etc.),
+    not verified against an official classification. Baseline numbers for the original 11-stock
+    universe are the same runs shown on <a href="runs.html">the granularity runs page</a>.
+  </p>
+</div>
+</body>
+</html>
