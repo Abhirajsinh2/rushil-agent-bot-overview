@@ -61,8 +61,10 @@
   }
   .wrap { max-width: 960px; margin: 0 auto; }
 
-  .back-link { display: inline-block; margin-bottom: 16px; font-size: 13px; color: var(--text-2); text-decoration: none; }
-  .back-link:hover { color: var(--series-1); }
+  .site-nav { display: block; margin-bottom: 16px; font-size: 13px; color: var(--text-2); }
+  .site-nav a { color: var(--text-2); text-decoration: none; }
+  .site-nav a:hover { color: var(--series-1); }
+  .site-nav .sep { margin: 0 7px; opacity: .5; }
 
   header { margin-bottom: 28px; }
   h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
@@ -153,44 +155,46 @@
 </head>
 <body>
 <div class="wrap">
-  <a class="back-link" href="runs.html">&larr; All runs</a>
+  <nav class="site-nav">
+    <a href="index.html">&larr; Overview</a><span class="sep">&middot;</span><a href="runs.html">Runs</a><span class="sep">&middot;</span><a href="sweep.html">Sweep</a><span class="sep">&middot;</span><a href="regime.html">Regime</a>
+  </nav>
   <header>
     <h1>15-Minute Candles (original)</h1>
     <div class="subtitle">15-min - rushil_inside_bar_v1 (long + short) - 5-day replay, real Upstox data</div>
   </header>
 
-  <div class="callout"><strong>118 of 200 signals</strong> (61% of all vetoes) were rejected for <code>max_total_concurrent_positions</code> - the single most common reason a detected setup never became a trade.</div>
+  
 
   <div class="stats">
     <div class="tile">
       <div class="label">Gross P&amp;L</div>
-      <div class="value pos">+₹9.40</div>
+      <div class="value pos">+₹66.00</div>
       <div class="sub">before charges</div>
     </div>
     <div class="tile">
       <div class="label">Charges</div>
-      <div class="value">₹12.24</div>
-      <div class="sub">130% of |gross P&amp;L|</div>
+      <div class="value">₹3.12</div>
+      <div class="sub">5% of |gross P&amp;L|</div>
     </div>
     <div class="tile">
       <div class="label">Net P&amp;L</div>
-      <div class="value neg">−₹2.84</div>
+      <div class="value pos">+₹62.88</div>
       <div class="sub">gross minus charges</div>
     </div>
     <div class="tile">
       <div class="label">Win rate</div>
-      <div class="value">40%</div>
-      <div class="sub">2 win(s) / 5 trades</div>
+      <div class="value">100%</div>
+      <div class="sub">1 win(s) / 1 trades</div>
     </div>
     <div class="tile">
       <div class="label">Trades filled</div>
-      <div class="value">5</div>
-      <div class="sub">of 200 signals fired</div>
+      <div class="value">1</div>
+      <div class="sub">of 4 signals fired</div>
     </div>
     <div class="tile">
       <div class="label">Vetoed</div>
-      <div class="value">193</div>
-      <div class="sub">96% of signals</div>
+      <div class="value">0</div>
+      <div class="sub">0% of signals</div>
     </div>
   </div>
 
@@ -231,10 +235,10 @@
 </div>
 
 <script>
-const trades = [{"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2026-09-15 10:00", "entry": 1101.7, "exit_time": "2026-09-15 12:00", "exit": 1092.9, "reason": "TIME_EXIT", "gross": 8.8, "cost": 1.16, "pnl": 7.64}, {"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2026-09-15 10:00", "entry": 2774.0, "exit_time": "2026-09-15 12:00", "exit": 2757.3, "reason": "TIME_EXIT", "gross": 16.7, "cost": 2.93, "pnl": 13.77}, {"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2026-09-15 10:00", "entry": 1830.2, "exit_time": "2026-09-15 12:00", "exit": 1833.8, "reason": "TIME_EXIT", "gross": -3.6, "cost": 1.94, "pnl": -5.54}, {"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2026-09-15 12:15", "entry": 967.3, "exit_time": "2026-09-15 12:45", "exit": 970.8, "reason": "STOP_LOSS", "gross": -3.5, "cost": 1.03, "pnl": -4.53}, {"symbol": "TITAN", "dir": "SHORT", "entry_time": "2026-09-15 12:15", "entry": 4886.0, "exit_time": "2026-09-15 14:15", "exit": 4895.0, "reason": "TIME_EXIT", "gross": -9.0, "cost": 5.18, "pnl": -14.18}];
-const vetoes = [{"reason": "max_total_concurrent_positions", "count": 118, "dominant": true}, {"reason": "outside_entry_window", "count": 54}, {"reason": "max_concurrent_positions", "count": 19}, {"reason": "stop_distance_exceeds_cap_after_gap", "count": 2}];
-const bySymbol = [{"symbol": "HINDALCO", "signals": 23, "trades": 1, "net": -4.53}, {"symbol": "TITAN", "signals": 22, "trades": 1, "net": -14.18}, {"symbol": "EICHERMOT", "signals": 21, "trades": 0, "net": 0.0}, {"symbol": "HDFCBANK", "signals": 21, "trades": 0, "net": 0.0}, {"symbol": "JINDALSTEL", "signals": 20, "trades": 1, "net": 7.64}, {"symbol": "SUNPHARMA", "signals": 19, "trades": 1, "net": -5.54}, {"symbol": "MUTHOOTFIN", "signals": 18, "trades": 1, "net": 13.77}, {"symbol": "BHARTIARTL", "signals": 16, "trades": 0, "net": 0.0}, {"symbol": "INDHOTEL", "signals": 15, "trades": 0, "net": 0.0}, {"symbol": "HYUNDAI", "signals": 13, "trades": 0, "net": 0.0}, {"symbol": "LODHA", "signals": 12, "trades": 0, "net": 0.0}];
-const symbolGroups = [{"symbol": "JINDALSTEL", "trades": [{"symbol": "JINDALSTEL", "dir": "SHORT", "entry_time": "2026-09-15 10:00", "entry": 1101.7, "exit_time": "2026-09-15 12:00", "exit": 1092.9, "reason": "TIME_EXIT", "gross": 8.8, "cost": 1.16, "pnl": 7.64}], "count": 1, "wins": 1, "win_rate": 100, "gross": 8.8, "cost": 1.16, "net": 7.64}, {"symbol": "MUTHOOTFIN", "trades": [{"symbol": "MUTHOOTFIN", "dir": "SHORT", "entry_time": "2026-09-15 10:00", "entry": 2774.0, "exit_time": "2026-09-15 12:00", "exit": 2757.3, "reason": "TIME_EXIT", "gross": 16.7, "cost": 2.93, "pnl": 13.77}], "count": 1, "wins": 1, "win_rate": 100, "gross": 16.7, "cost": 2.93, "net": 13.77}, {"symbol": "SUNPHARMA", "trades": [{"symbol": "SUNPHARMA", "dir": "SHORT", "entry_time": "2026-09-15 10:00", "entry": 1830.2, "exit_time": "2026-09-15 12:00", "exit": 1833.8, "reason": "TIME_EXIT", "gross": -3.6, "cost": 1.94, "pnl": -5.54}], "count": 1, "wins": 0, "win_rate": 0, "gross": -3.6, "cost": 1.94, "net": -5.54}, {"symbol": "HINDALCO", "trades": [{"symbol": "HINDALCO", "dir": "SHORT", "entry_time": "2026-09-15 12:15", "entry": 967.3, "exit_time": "2026-09-15 12:45", "exit": 970.8, "reason": "STOP_LOSS", "gross": -3.5, "cost": 1.03, "pnl": -4.53}], "count": 1, "wins": 0, "win_rate": 0, "gross": -3.5, "cost": 1.03, "net": -4.53}, {"symbol": "TITAN", "trades": [{"symbol": "TITAN", "dir": "SHORT", "entry_time": "2026-09-15 12:15", "entry": 4886.0, "exit_time": "2026-09-15 14:15", "exit": 4895.0, "reason": "TIME_EXIT", "gross": -9.0, "cost": 5.18, "pnl": -14.18}], "count": 1, "wins": 0, "win_rate": 0, "gross": -9.0, "cost": 5.18, "net": -14.18}];
+const trades = [{"symbol": "TITAN", "dir": "LONG", "entry_time": "2026-09-21 10:30", "entry": 3020.0, "exit_time": "2026-09-21 10:45", "exit": 2924.0, "reason": "TARGET", "gross": 66.0, "cost": 3.12, "pnl": 62.88}];
+const vetoes = [];
+const bySymbol = [{"symbol": "TITAN", "signals": 4, "trades": 1, "net": 62.88}];
+const symbolGroups = [{"symbol": "TITAN", "trades": [{"symbol": "TITAN", "dir": "LONG", "entry_time": "2026-09-21 10:30", "entry": 3020.0, "exit_time": "2026-09-21 10:45", "exit": 2924.0, "reason": "TARGET", "gross": 66.0, "cost": 3.12, "pnl": 62.88}], "count": 1, "wins": 1, "win_rate": 100, "gross": 66.0, "cost": 3.12, "net": 62.88}];
 
 // ---- reusable: render a trade table into a <tbody> ----
 function renderTradeTable(tbody, tradeList, showSymbol) {

@@ -125,11 +125,12 @@
     display: flex; gap: 22px; flex-wrap: wrap; margin-top: 22px;
     padding-top: 18px; border-top: 1px solid var(--border);
   }
-  .nav-links a {
+  .nav-links a, .nav-links span {
     font-family: "IBM Plex Mono", monospace; font-size: 12.5px; font-weight: 500;
-    text-decoration: none; color: var(--text-1);
   }
+  .nav-links a { text-decoration: none; color: var(--text-1); }
   .nav-links a:hover { color: var(--accent); }
+  .nav-links span { color: var(--muted); }
 
   /* ---------------- sections ---------------- */
   section { padding: 54px 0; border-bottom: 1px solid var(--border); }
@@ -263,8 +264,10 @@
       </div>
     </div>
     <nav class="nav-links">
-      <a href="runs.html">granularity backtests (15m/10m/5m, full history) &rarr;</a>
-      <a href="sweep.html">trigger &amp; fill-timing sweep (12 combos) &rarr;</a>
+      <span>Overview</span>
+      <a href="runs.html">Runs (15m/10m/5m, full history)</a>
+      <a href="sweep.html">Sweep (12 trigger/fill combos)</a>
+      <a href="regime.html">Regime filter (NIFTY 20-SMA)</a>
     </nav>
   </div>
 </div>

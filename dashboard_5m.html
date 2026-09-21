@@ -61,8 +61,10 @@
   }
   .wrap { max-width: 960px; margin: 0 auto; }
 
-  .back-link { display: inline-block; margin-bottom: 16px; font-size: 13px; color: var(--text-2); text-decoration: none; }
-  .back-link:hover { color: var(--series-1); }
+  .site-nav { display: block; margin-bottom: 16px; font-size: 13px; color: var(--text-2); }
+  .site-nav a { color: var(--text-2); text-decoration: none; }
+  .site-nav a:hover { color: var(--series-1); }
+  .site-nav .sep { margin: 0 7px; opacity: .5; }
 
   header { margin-bottom: 28px; }
   h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
@@ -153,7 +155,9 @@
 </head>
 <body>
 <div class="wrap">
-  <a class="back-link" href="runs.html">&larr; All runs</a>
+  <nav class="site-nav">
+    <a href="index.html">&larr; Overview</a><span class="sep">&middot;</span><a href="runs.html">Runs</a><span class="sep">&middot;</span><a href="sweep.html">Sweep</a><span class="sep">&middot;</span><a href="regime.html">Regime</a>
+  </nav>
   <header>
     <h1>5-Minute Candles - Full 4.7yr</h1>
     <div class="subtitle">5-min - rushil_inside_bar_v1 - 2022-01-03 to 2026-09-18</div>
